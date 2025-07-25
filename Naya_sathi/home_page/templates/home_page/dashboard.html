@@ -1,0 +1,136 @@
+{% extends 'home_page/base.html' %}
+
+{% block title %}Dashboard - Legal Guidance Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-message">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <p>Your Legal Guidance Platform is ready to help you navigate legal challenges and ensure justice.</p>
+    </div>
+    
+    <div class="analytics-container">
+        <div class="pie-chart-plane">
+            <div class="pie-chart-container">
+                <div class="pie-chart">
+                    <div class="pie-chart-center">
+                        <div class="pie-chart-total">{{ stats.total }}</div>
+                        <div class="pie-chart-label">Total Cases</div>
+                    </div>
+                </div>
+                
+                <div class="pie-legend">
+                    <div class="legend-item">
+                        <div class="legend-color success"></div>
+                        <div class="legend-info">
+                            <div class="legend-number">{{ stats.successful_cases }}</div>
+                            <div class="legend-label">Successful Cases</div>
+                        </div>
+                    </div>
+                    
+                    <div class="legend-item">
+                        <div class="legend-color cases"></div>
+                        <div class="legend-info">
+                            <div class="legend-number">{{ stats.cases_filed }}</div>
+                            <div class="legend-label">Cases Filed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="legend-item">
+                        <div class="legend-color firs"></div>
+                        <div class="legend-info">
+                            <div class="legend-number">{{ stats.firs_filed }}</div>
+                            <div class="legend-label">FIRs Filed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="#" class="view-btn reports">View Reports</a>
+            </div>
+        </div>
+        
+        <div class="bar-chart-plane">
+            <div class="chart-container">
+                <div class="chart-title">Criminal Activities Trend</div>
+                <div class="bar-chart">
+                    <div class="bar" style="height: 60%;">45</div>
+                    <div class="bar" style="height: 75%;">67</div>
+                    <div class="bar" style="height: 90%;">89</div>
+                    <div class="bar" style="height: 85%;">78</div>
+                    <div class="bar" style="height: 95%;">94</div>
+                    <div class="bar" style="height: 100%;">112</div>
+                </div>
+                <div class="bar-labels">
+                    <span>Jan</span>
+                    <span>Feb</span>
+                    <span>Mar</span>
+                    <span>Apr</span>
+                    <span>May</span>
+                    <span>Jun</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="#" class="view-btn">View Cases</a>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 3rem;">
+        <a href="{% url 'home_page:feature_selection' %}" class="need-guidance-btn-large">
+            Need Guidance!
+        </a>
+    </div>
+    
+    <div class="dashboard-features">
+        <div class="feature-column legal">
+            <div class="feature-column-icon">⚖️</div>
+            <div class="feature-column-title">Legal Guidance</div>
+            <div class="feature-column-desc">Comprehensive legal assistance for various issues including police misconduct, domestic violence, and accidents.</div>
+        </div>
+        
+        <div class="feature-column fir">
+            <div class="feature-column-icon">📋</div>
+            <div class="feature-column-title">FIR Processing</div>
+            <div class="feature-column-desc">Fast and transparent FIR filing system with automatic report generation and legal article references.</div>
+        </div>
+        
+        <div class="feature-column anonymous">
+            <div class="feature-column-icon">🔒</div>
+            <div class="feature-column-title">Anonymous Reporting</div>
+            <div class="feature-column-desc">Secure anonymous crime reporting system connected to news channels and legal authorities.</div>
+        </div>
+        
+        <div class="feature-column case-support">
+            <div class="feature-column-icon">🏛️</div>
+            <div class="feature-column-title">Case Support</div>
+            <div class="feature-column-desc">Expert opinions and second opinions for ongoing legal cases to ensure fair proceedings.</div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 1rem;">
+        <a href="{% url 'home_page:showcase' step=1 %}" class="btn btn-secondary">
+            Review Features Again
+        </a>
+    </div>
+</div>
+
+<script>
+    // Add dashboard animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.stat-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}
