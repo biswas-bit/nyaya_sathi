@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Legal Guidance Platform{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFE0B2 0%, #FF9800 50%, #FF5722 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #FF9800 0%, #FF5722 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 3rem;
+            max-width: 800px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 3rem;
+            max-width: 1200px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #FF9800, #FF5722);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,152,0,0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #FFB74D, #FFA726);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,183,77,0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #FFE0B2;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9800, #FF5722);
+            transition: width 0.5s ease;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 2rem;
+            color: #E65100;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .feature-description {
+            font-size: 1.1rem;
+            color: #BF360C;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .feature-details {
+            font-size: 1rem;
+            color: #FF5722;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .step-counter {
+            color: #FF5722;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .pie-chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+        }
+
+        .pie-chart {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #4CAF50 0deg 120deg,
+                #FF9800 120deg 240deg,
+                #2196F3 240deg 360deg
+            );
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .pie-chart::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .pie-chart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+        }
+
+        .pie-chart-total {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #E65100;
+            margin-bottom: 0.5rem;
+        }
+
+        .pie-chart-label {
+            font-size: 1rem;
+            color: #BF360C;
+            font-weight: 600;
+        }
+
+        .pie-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-color.success {
+            background: #4CAF50;
+        }
+
+        .legend-color.cases {
+            background: #FF9800;
+        }
+
+        .legend-color.firs {
+            background: #2196F3;
+        }
+
+        .legend-info {
+            flex: 1;
+        }
+
+        .legend-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #E65100;
+            margin-bottom: 0.3rem;
+        }
+
+        .legend-label {
+            color: #BF360C;
+            font-size: 0.9rem;
+        }
+
+        .welcome-message {
+            background: linear-gradient(135deg, #FFE0B2, #FFCC80);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .welcome-message h2 {
+            color: #E65100;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-message p {
+            color: #BF360C;
+        }
+
+        .chart-container {
+            background: transparent;
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .chart-title {
+            color: #E65100;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            height: 200px;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .bar {
+            background: linear-gradient(to top, #FF5722, #FF9800);
+            border-radius: 5px 5px 0 0;
+            min-width: 30px;
+            display: flex;
+            align-items: end;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 5px;
+        }
+
+        .bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #BF360C;
+        }
+
+        .need-guidance-btn {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2rem auto;
+            box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+        }
+
+        .need-guidance-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.4);
+        }
+
+        .need-guidance-btn-large {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            color: white;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2rem auto;
+            box-shadow: 0 8px 25px rgba(76,175,80,0.4);
+        }
+
+        .need-guidance-btn-large:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(76,175,80,0.5);
+        }
+
+        .analytics-container {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .pie-chart-plane {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            flex: 1;
+        }
+
+        .bar-chart-plane {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            flex: 0 0 400px;
+        }
+
+        .view-btn {
+            background: linear-gradient(45deg, #2196F3, #64B5F6);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 12px rgba(33,150,243,0.3);
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(33,150,243,0.4);
+        }
+
+        .view-btn.reports {
+            background: linear-gradient(45deg, #9C27B0, #BA68C8);
+            box-shadow: 0 4px 12px rgba(156,39,176,0.3);
+        }
+
+        .view-btn.reports:hover {
+            box-shadow: 0 6px 16px rgba(156,39,176,0.4);
+        }
+
+        .feature-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .dashboard-features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-column {
+            background: linear-gradient(135deg, #FFE0B2, #FFCC80);
+            border-radius: 15px;
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .feature-column:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .feature-column.legal {
+            background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+        }
+
+        .feature-column.fir {
+            background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+        }
+
+        .feature-column.anonymous {
+            background: linear-gradient(135deg, #E8F5E8, #C8E6C9);
+        }
+
+        .feature-column.case-support {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+        }
+
+        .feature-column-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-column-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #E65100;
+            margin-bottom: 1rem;
+        }
+
+        .feature-column-desc {
+            font-size: 0.9rem;
+            color: #BF360C;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .container, .dashboard-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+
+            .analytics-container {
+                flex-direction: column;
+            }
+
+            .bar-chart-plane {
+                flex: 1;
+            }
+
+            .feature-columns, .dashboard-features {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .pie-chart-container {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .pie-chart {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <h1>Legal Guidance Platform</h1>
+            <div class="nav-links">
+                <a href="{% url 'home_page:dashboard' %}">Dashboard</a>
+                <a href="{% url 'authentication:logout' %}">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
