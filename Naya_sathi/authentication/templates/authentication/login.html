@@ -1,0 +1,40 @@
+{% extends 'authentication/base.html' %}
+<!-- Inherit the base template from the authentication app -->
+
+{% block title %}Login - Authentication{% endblock %}
+<!-- Set the title of the page -->
+
+
+{% block content %}
+<!-- Start of the content block that will be inserted into the base.html template -->
+
+<h2 class="text-center">Login</h2>
+<!-- Page heading, centered -->
+
+<form method="post">
+    {% csrf_token %}
+     <!-- Include CSRF token for security (required for POST requests) -->
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+         <!-- Input field for username with 'required' for client-side validation -->
+    </div>
+    
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+                <!-- Input field for password with 'required' for client-side validation -->
+
+    </div>
+    
+    <button type="submit" class="btn">Login</button>
+        <!-- Submit button to log in -->
+
+</form>
+
+<p class="text-center" style="margin-top: 20px;">
+    Don't have an account? <a href="{% url 'authentication:register' %}" class="link">Register here</a>
+     <!-- Link to registration page using Django's URL template tag -->
+</p>
+{% endblock %}
+<!-- End of content block -->  

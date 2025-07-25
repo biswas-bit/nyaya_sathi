@@ -1,0 +1,59 @@
+{% extends 'home_page/base.html' %}
+
+{% block title %}Feature Showcase - Legal Guidance Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ progress_percentage }}%"></div>
+    </div>
+    
+    <div class="step-counter">
+        Step {{ current_step }} of {{ total_steps }}
+    </div>
+    
+    <div class="feature-card">
+        <span class="feature-icon">{{ current_feature.icon }}</span>
+        <h2 class="feature-title">{{ current_feature.title }}</h2>
+        <p class="feature-description">{{ current_feature.description }}</p>
+        <p class="feature-details">{{ current_feature.details }}</p>
+        
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+            {% if current_step > 1 %}
+                <a href="{% url 'home_page:showcase' step=current_step|add:-1 %}" class="btn btn-secondary">
+                    ← Previous
+                </a>
+            {% endif %}
+            
+            {% if not is_last_step %}
+                <a href="{% url 'home_page:showcase' step=next_step %}" class="btn btn-primary">
+                    Continue →
+                </a>
+            {% else %}
+                <a href="{% url 'home_page:dashboard' %}" class="btn btn-primary">
+                    Go to Dashboard →
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem; color: #FF5722;">
+        <small>Experience comprehensive legal guidance and transparent justice</small>
+    </div>
+</div>
+
+<script>
+    // Add smooth transitions and animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const featureCard = document.querySelector('.feature-card');
+        featureCard.style.opacity = '0';
+        featureCard.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            featureCard.style.transition = 'all 0.6s ease';
+            featureCard.style.opacity = '1';
+            featureCard.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>
+{% endblock %}
