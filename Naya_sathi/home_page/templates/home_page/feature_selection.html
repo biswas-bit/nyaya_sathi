@@ -1,0 +1,98 @@
+{% extends 'home_page/base.html' %} {% block title %}Feature Selection - Legal
+Guidance Platform{% endblock %} {% block content %}
+<div class="container">
+  <div style="text-align: center; margin-bottom: 3rem">
+    <h2 style="color: #e65100; margin-bottom: 1rem">
+      Select the service you need
+    </h2>
+    <p style="color: #bf360c">
+      Choose from our comprehensive legal guidance features
+    </p>
+  </div>
+
+  <div class="feature-columns">
+    <a href="#" class="feature-column legal">
+      <div class="feature-column-icon">⚖️</div>
+      <div class="feature-column-title">Legal Guidance</div>
+      <div class="feature-column-desc">
+        Get comprehensive legal assistance for various issues including police
+        misconduct, domestic violence, and accidents.
+      </div>
+    </a>
+
+    <a href="{% url 'fir:report_fir' %}" class="feature-column fir">
+      <div class="feature-column-icon">📋</div>
+      <div class="feature-column-title">FIR Process</div>
+      <div class="feature-column-desc">
+        Streamlined FIR filing with photo/video evidence upload and automatic
+        report generation.
+      </div>
+    </a>
+
+    <a href="#" class="feature-column anonymous">
+      <div class="feature-column-icon">🔒</div>
+      <div class="feature-column-title">Anonymous Reporting</div>
+      <div class="feature-column-desc">
+        Secure anonymous reporting system to report crimes without fear of
+        retaliation.
+      </div>
+    </a>
+
+    <a href="#" class="feature-column case-support">
+      <div class="feature-column-icon">🏛️</div>
+      <div class="feature-column-title">Case Support</div>
+      <div class="feature-column-desc">
+        Verify legal decisions and get second opinions for ongoing court cases.
+      </div>
+    </a>
+  </div>
+
+  <div style="text-align: center; margin-top: 3rem">
+    <a href="{% url 'home_page:dashboard' %}" class="btn btn-secondary">
+      ← Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<script>
+  // Add smooth animations for feature columns
+  document.addEventListener("DOMContentLoaded", function () {
+    const columns = document.querySelectorAll(".feature-column");
+    columns.forEach((column, index) => {
+      column.style.opacity = "0";
+      column.style.transform = "translateY(30px)";
+
+      setTimeout(() => {
+        column.style.transition = "all 0.6s ease";
+        column.style.opacity = "1";
+        column.style.transform = "translateY(0)";
+      }, index * 150);
+    });
+  });
+
+  // Add click feedback
+  document.querySelectorAll(".feature-column").forEach((column) => {
+    column.addEventListener("click", function (e) {
+      // Don't prevent default for FIR Process as it has a real URL
+      if (!this.classList.contains("fir")) {
+        e.preventDefault();
+        this.style.transform = "scale(0.95)";
+        setTimeout(() => {
+          this.style.transform = "scale(1)";
+          // Here you would navigate to the specific feature page
+          alert(
+            "Feature coming soon! This will navigate to: " +
+              this.querySelector(".feature-column-title").textContent
+          );
+        }, 150);
+      } else {
+        // For FIR Process, just add the scale effect and let it navigate
+        this.style.transform = "scale(0.95)";
+        setTimeout(() => {
+          this.style.transform = "scale(1)";
+        }, 150);
+      }
+    });
+  });
+</script>
+{% endblock %}
