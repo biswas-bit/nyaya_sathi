@@ -6,4 +6,5 @@ app_name = 'fir'
 urlpatterns = [
     path('', views.report_fir, name='report_fir'),
     path('list/', views.fir_list, name='fir_list'),
+    path('download-pdf/<int:report_id>/', views.download_pdf_view, name='download_pdf'),
 ]
