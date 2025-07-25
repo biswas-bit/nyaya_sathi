@@ -24,6 +24,7 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('FIR/', include('FIR.urls')),
     path('', include('home_page.urls')),
+    path('guidence/',include("guide.urls"))
 ]
 
 if settings.DEBUG:

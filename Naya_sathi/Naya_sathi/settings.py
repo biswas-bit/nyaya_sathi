@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'authentication',
     'home_page',
     'FIR',
+    'guide',
 ]
 
 MIDDLEWARE = [
