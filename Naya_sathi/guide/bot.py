@@ -75,7 +75,7 @@ class LegalAssistant:
         # Simplify with Gemini
         model = genai.GenerativeModel("gemini-1.5-flash")
         simplified_response = model.generate_content(
-            f"Simplify and add more context relevant to Nepal: {ans}"
+            f"Simplify the input legal text and explain it in a way that's understandable for the general public in Nepal. Add practical context using local examples. Then, identify which section(s), article(s), or chapter(s) of Nepal's law apply to this situation. Guide the user on how and where they can take legal action based on this information: {ans}"
         )
         
         return {
