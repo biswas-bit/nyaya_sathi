@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'home_page',
     'FIR',
     'consultion_lawyer',
-    'crime_reports'
+    'crime_reports',
 ]
 
 MIDDLEWARE = [
