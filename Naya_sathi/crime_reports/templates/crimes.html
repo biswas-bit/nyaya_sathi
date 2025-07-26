@@ -3,1510 +3,877 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepal Crime Analytics Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <title>Legal Assistant | Nyaya Sathi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --background: 220 13% 6%;
-            --foreground: 0 0% 95%;
-            --card: 220 13% 8%;
-            --card-foreground: 0 0% 95%;
-            --primary: 213 94% 50%;
-            --primary-foreground: 0 0% 98%;
-            --secondary: 220 13% 15%;
-            --secondary-foreground: 0 0% 90%;
-            --muted: 220 13% 12%;
-            --muted-foreground: 215 20.2% 65.1%;
-            --accent: 45 100% 50%;
-            --destructive: 0 84.2% 60.2%;
-            --border: 220 13% 18%;
-            --radius: 0.5rem;
+            --primary-color: #ffb20f;
+            --primary-dark: #ff9900;
+            --bg-color: #343541;
+            --message-bg-user: #444654;
+            --message-bg-bot: #40414f;
+            --text-color: #ececf1;
+            --text-secondary: #acacbe;
+            --input-bg: #40414f;
+            --border-radius: 8px;
+            --urgent-red: #ff4d4d;
         }
-
+        
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            border-color: hsl(var(--border));
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: hsl(var(--background));
-            color: hsl(var(--foreground));
-            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-
-        .dark { color-scheme: dark; }
-        .min-h-screen { min-height: 100vh; }
-        .bg-background { background-color: hsl(var(--background)); }
-        .relative { position: relative; }
-        .absolute { position: absolute; }
-        .overflow-hidden { overflow: hidden; }
-        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-        .from-primary\/20 { --tw-gradient-from: hsl(var(--primary) / 0.2); --tw-gradient-to: hsl(var(--primary) / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
-        .via-background { --tw-gradient-to: hsl(var(--background) / 0); --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--background)), var(--tw-gradient-to); }
-        .to-accent\/10 { --tw-gradient-to: hsl(var(--accent) / 0.1); }
-        .border-b { border-bottom-width: 1px; }
-        .border { border-width: 1px; }
-        .border-border { border-color: hsl(var(--border)); }
-        .container { width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto; }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
-        .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
-        .p-6 { padding: 1.5rem; }
-        .p-4 { padding: 1rem; }
-        .p-2 { padding: 0.5rem; }
-        .pt-0 { padding-top: 0px; }
-        .pb-4 { padding-bottom: 1rem; }
-        .pb-20 { padding-bottom: 5rem; }
-        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-        .text-center { text-align: center; }
-        .max-w-4xl { max-width: 56rem; }
-        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        .text-xs { font-size: 0.75rem; line-height: 1rem; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .font-medium { font-weight: 500; }
-        .text-foreground { color: hsl(var(--foreground)); }
-        .text-accent { color: hsl(var(--accent)); }
-        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
-        .text-card-foreground { color: hsl(var(--card-foreground)); }
-        .text-red-400 { color: rgb(248 113 113); }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .mb-8 { margin-bottom: 2rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-3 { margin-bottom: 0.75rem; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-1 { margin-bottom: 0.25rem; }
-        .mt-12 { margin-top: 3rem; }
-        .mt-6 { margin-top: 1.5rem; }
-        .mt-4 { margin-top: 1rem; }
-        .mt-3 { margin-top: 0.75rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .mt-1 { margin-top: 0.25rem; }
-        .-mt-px { margin-top: -1px; }
-        .-top-2 { top: -0.5rem; }
-        .-right-2 { right: -0.5rem; }
-        .-left-2 { left: -0.5rem; }
-        .-bottom-1 { bottom: -0.25rem; }
-        .top-full { top: 100%; }
-        .bottom-full { bottom: 100%; }
-        .left-1\/2 { left: 50%; }
-        .block { display: block; }
-        .flex { display: flex; }
-        .grid { display: grid; }
-        .inline-flex { display: inline-flex; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-4 { gap: 1rem; }
-        .gap-3 { gap: 0.75rem; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-1 { gap: 0.25rem; }
-        .gap-px { gap: 1px; }
-        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .space-y-12 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(3rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(3rem * var(--tw-space-y-reverse)); }
-        .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(0.375rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(0.375rem * var(--tw-space-y-reverse)); }
-        .bg-card\/50 { background-color: hsl(var(--card) / 0.5); }
-        .bg-card { background-color: hsl(var(--card)); }
-        .bg-secondary { background-color: hsl(var(--secondary)); }
-        .bg-secondary\/50 { background-color: hsl(var(--secondary) / 0.5); }
-        .bg-secondary\/30 { background-color: hsl(var(--secondary) / 0.3); }
-        .bg-secondary\/20 { background-color: hsl(var(--secondary) / 0.2); }
-        .bg-red-500\/10 { background-color: rgb(239 68 68 / 0.1); }
-        .bg-red-500 { background-color: rgb(239 68 68); }
-        .bg-orange-500 { background-color: rgb(249 115 22); }
-        .bg-yellow-500 { background-color: rgb(234 179 8); }
-        .bg-yellow-300 { background-color: rgb(253 224 71); }
-        .bg-white { background-color: white; }
-        .bg-black { background-color: black; }
-        .bg-opacity-80 { background-opacity: 0.8; }
-        .text-white { color: white; }
-        .backdrop-blur { backdrop-filter: blur(8px); }
-        .rounded-lg { border-radius: calc(var(--radius) + 2px); }
-        .rounded-xl { border-radius: calc(var(--radius) + 6px); }
-        .rounded-full { border-radius: 9999px; }
-        .rounded-sm { border-radius: calc(var(--radius) - 4px); }
-        .rounded { border-radius: calc(var(--radius) - 2px); }
-        .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
-        .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
-        .w-full { width: 100%; }
-        .w-8 { width: 2rem; }
-        .w-6 { width: 1.5rem; }
-        .w-5 { width: 1.25rem; }
-        .w-4 { width: 1rem; }
-        .w-3 { width: 0.75rem; }
-        .w-2 { width: 0.5rem; }
-        .h-96 { height: 24rem; }
-        .h-80 { height: 20rem; }
-        .h-8 { height: 2rem; }
-        .h-6 { height: 1.5rem; }
-        .h-5 { height: 1.25rem; }
-        .h-4 { height: 1rem; }
-        .h-3 { height: 0.75rem; }
-        .h-2 { height: 0.5rem; }
-        .min-w-64 { min-width: 16rem; }
-        .max-w-72 { max-width: 18rem; }
-        .flex-col { flex-direction: column; }
-        .flex-wrap { flex-wrap: wrap; }
-        .leading-relaxed { line-height: 1.625; }
-        .tracking-tight { letter-spacing: -0.025em; }
-        .cursor-pointer { cursor: pointer; }
-        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .duration-300 { transition-duration: 300ms; }
-        .duration-500 { transition-duration: 500ms; }
-        .duration-1000 { transition-duration: 1000ms; }
-        .ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
-        .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
-        .-translate-x-1\/2 { --tw-translate-x: -50%; }
-        .-translate-y-1\/2 { --tw-translate-y: -50%; }
-        .-translate-y-px { --tw-translate-y: -1px; }
-        .group { }
-        .pointer-events-none { pointer-events: none; }
-        .z-50 { z-index: 50; }
-        .z-10 { z-index: 10; }
-        .inset-0 { top: 0px; right: 0px; bottom: 0px; left: 0px; }
-        .inset-1 { top: 0.25rem; right: 0.25rem; bottom: 0.25rem; left: 0.25rem; }
-        .opacity-0 { opacity: 0; }
-        .opacity-30 { opacity: 0.3; }
-        .opacity-40 { opacity: 0.4; }
-        .opacity-50 { opacity: 0.5; }
-        .opacity-60 { opacity: 0.6; }
-        .opacity-75 { opacity: 0.75; }
-        .opacity-80 { opacity: 0.8; }
-        .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
-        .animate-spin { animation: spin 1s linear infinite; }
-        .border-l-8 { border-left-width: 8px; }
-        .border-r-8 { border-right-width: 8px; }
-        .border-t-8 { border-top-width: 8px; }
-        .border-l-transparent { border-left-color: transparent; }
-        .border-r-transparent { border-right-color: transparent; }
-        .border-t-border { border-top-color: hsl(var(--border)); }
-        .border-t-card { border-top-color: hsl(var(--card)); }
-        .border-white { border-color: white; }
-        .border-opacity-30 { border-color: rgba(255, 255, 255, 0.3); }
-
-        /* Responsive */
-        @media (min-width: 768px) {
-            .md\\:text-6xl { font-size: 3.75rem; line-height: 1; }
-            .md\\:text-5xl { font-size: 3rem; line-height: 1; }
-            .md\\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
-            .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-            .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        
+        .header {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #5e5e6a;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-
-        @media (min-width: 1280px) {
-            .xl\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-
-        /* Custom animations */
-        .animate-fade-in {
-            animation: fadeIn 1s ease-out forwards;
-            opacity: 0;
+        
+        .header h1 i {
+            color: var(--primary-color);
         }
-
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-500 { animation-delay: 0.5s; }
-        .delay-700 { animation-delay: 0.7s; }
-
-        .group:hover .group-hover\\:opacity-100 { opacity: 1; }
-        .group:hover .group-hover\\:scale-110 { --tw-scale-x: 1.1; --tw-scale-y: 1.1; }
-        .group:hover .group-hover\\:-translate-y-1 { --tw-translate-y: -0.25rem; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
-
-        @keyframes ping {
-            75%, 100% { transform: scale(2); opacity: 0; }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 3D City specific styles */
-        .city-object {
-            transform-style: preserve-3d;
-            perspective: 300px;
-        }
-
-        .building-main {
-            transform-style: preserve-3d;
-        }
-
-        .building-side {
-            transform-style: preserve-3d;
-        }
-
-        /* Nepal map outline */
-        .nepal-outline {
-            position: absolute;
-            top: 8%;
-            left: 8%;
-            right: 8%;
-            bottom: 12%;
-            background: rgba(251, 191, 36, 0.1);
-            border: 2px solid rgba(251, 191, 36, 0.4);
-            border-radius: 25px 120px 40px 20px / 20px 40px 120px 25px;
-            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.3));
-        }
-
-        /* Tooltip animations */
-        .tooltip {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
-            transform: translateX(-50%) translateY(-10px) scale(0.95);
-        }
-
-        .group:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(-50%) translateY(-10px) scale(1);
-        }
-
-        /* Building window grid */
-        .window-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1px;
-            padding: 1px;
-        }
-
-        .window {
-            background: rgb(253, 224, 71);
-            opacity: 0.6;
-            border-radius: 1px;
-            width: 2px;
-            height: 2px;
-            box-shadow: 0 0 2px rgba(255, 255, 0, 0.5);
-        }
-
-        /* 3D Map Styles */
-        .scene-container {
+        
+        .message {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
             width: 100%;
-            height: 600px;
+            line-height: 1.5;
             position: relative;
         }
-
-        .header-3d {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 1000;
-            text-align: center;
+        
+        .message-user {
+            background-color: var(--message-bg-user);
         }
-
-        .header-3d h1 {
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 5px;
-            letter-spacing: -0.5px;
+        
+        .message-bot {
+            background-color: var(--message-bg-bot);
         }
-
-        .header-3d .subtitle {
-            font-size: 2.5rem;
-            color: #ef4444;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .header-3d p {
-            font-size: 1.2rem;
-            color: #cbd5e1;
-        }
-
-        .controls-3d {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid rgba(71, 85, 105, 0.5);
-            border-radius: 10px;
-            padding: 12px 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .legend-3d {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid rgba(71, 85, 105, 0.5);
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            min-width: 200px;
-        }
-
-        .legend-3d h4 {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: white;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .tooltip-3d {
-            position: fixed;
-            background: rgba(15, 23, 42, 0.98);
-            border: 1px solid rgba(71, 85, 105, 0.8);
-            border-radius: 12px;
-            padding: 16px;
-            min-width: 280px;
-            max-width: 320px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            z-index: 2000;
-            pointer-events: none;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-
-        .tooltip-3d.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .tooltip-3d h3 {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            flex-shrink: 0;
         }
-
-        .tooltip-3d .danger-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-left: auto;
+        
+        .avatar-user {
+            background-color: #19c37d;
         }
-
-        .tooltip-3d .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
+        
+        .avatar-bot {
+            background-color: #5436da;
         }
-
-        .tooltip-3d .stat {
-            background: rgba(51, 65, 85, 0.6);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .tooltip-3d .stat .label {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tooltip-3d .stat .value {
+        
+        .avatar i {
+            color: white;
             font-size: 1rem;
-            font-weight: bold;
+        }
+        
+        .message-content {
+            flex: 1;
+            padding-top: 0.25rem;
+        }
+        
+        .message-content p {
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+        
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .message-content ul,
+        .message-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+        
+        .message-content li {
+            margin-bottom: 0.5rem;
+            white-space: pre-wrap;
+        }
+        
+        .input-container {
+            padding: 1rem;
+            background-color: var(--bg-color);
+            position: sticky;
+            bottom: 0;
+            border-top: 1px solid #5e5e6a;
+        }
+        
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        #user-input {
+            width: 100%;
+            padding: 1rem 3.5rem 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+            resize: none;
+            min-height: 60px;
+            max-height: 200px;
+            line-height: 1.5;
+        }
+        
+        #send-button {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            background-color: var(--primary-color);
             color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-
-        .tooltip-3d .description {
-            background: rgba(30, 41, 59, 0.6);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
+        
+        #send-button:hover {
+            background-color: var(--primary-dark);
         }
-
-        .tooltip-3d .description .label {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-bottom: 4px;
+        
+        #send-button i {
+            font-size: 1rem;
         }
-
-        .tooltip-3d .description .value {
-            font-size: 0.9rem;
-            color: white;
-            line-height: 1.4;
+        
+        .typing-indicator {
+            display: none;
+            gap: 0.5rem;
+            padding: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
         }
-
-        .tooltip-3d .risk-assessment {
-            margin-top: 12px;
+        
+        .typing-indicator .avatar {
+            background-color: #5436da;
         }
-
-        .tooltip-3d .risk-bar {
-            background: rgba(71, 85, 105, 0.5);
+        
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding-top: 0.25rem;
+        }
+        
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
             height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 6px;
-        }
-
-        .tooltip-3d .risk-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            z-index: 1000;
-        }
-
-        .loading .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid white;
+            background-color: var(--text-secondary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            animation: bounce 1.4s infinite ease-in-out;
         }
-
-        .performance-indicator {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            z-index: 1000;
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
         }
-
-        @media (max-width: 768px) {
-            .header-3d h1 {
-                font-size: 2.5rem;
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
             }
-            .header-3d .subtitle {
-                font-size: 2rem;
+            30% {
+                transform: translateY(-5px);
             }
         }
-
-        /* Tab navigation */
-        .tab-container {
+        
+        /* Popup styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
-            margin-bottom: 2rem;
+            align-items: center;
+            z-index: 1000;
         }
-
-        .tab-button {
+        
+        .popup-content {
+            background-color: var(--bg-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .popup-content h2 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .popup-content select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: none;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .popup-content button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
             padding: 0.75rem 1.5rem;
-            background: hsl(var(--secondary));
-            border: 1px solid hsl(var(--border));
-            color: hsl(var(--foreground));
+            border-radius: var(--border-radius);
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            font-size: 1rem;
+            transition: background-color 0.2s;
         }
-
-        .tab-button:first-child {
-            border-radius: 0.5rem 0 0 0.5rem;
+        
+        .popup-content button:hover {
+            background-color: var(--primary-dark);
         }
-
-        .tab-button:last-child {
-            border-radius: 0 0.5rem 0.5rem 0;
-        }
-
-        .tab-button.active {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-        }
-
-        .tab-content {
+        
+        /* Lawyer Recommendation Styles */
+        .lawyer-recommendation {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 100;
             display: none;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 300px;
+            background-color: var(--message-bg-bot);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--primary-color);
         }
-
-        .tab-content.active {
+        
+        .lawyer-card {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border-radius: calc(var(--border-radius) - 2px);
+            padding: 1rem;
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .lawyer-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .lawyer-card strong {
             display: block;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            color: var(--primary-color);
+        }
+        
+        .lawyer-card p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .lawyer-card small {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        .lawyer-contact {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .lawyer-contact button {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .lawyer-contact button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .urgent-tag {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: var(--urgent-red);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .lawyer-recommendation {
+                position: fixed;
+                bottom: 80px;
+                top: auto;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                width: calc(100% - 20px);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dark">
-    
-
-            <!-- 3D Map Section -->
-            <section class="container mx-auto px-0 py-8 animate-fade-in delay-700">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
-                        🗺️ Nepal Crime Dashboard 
-                    </h2>
-                    <p class="text-muted-foreground text-lg">Interactive 3D map showing dangerous areas and safety statistics across Nepal</p>
-                </div>
-                
-                <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
-                    <div class="flex flex-col space-y-1.5 p-6 pb-4">
-                        <div class="flex items-center justify-between flex-wrap gap-4">
-                            <div>
-                                <h3 class="tracking-tight text-xl font-bold text-foreground">Nepal Crime Heatmap</h3>
-                                <p class="text-muted-foreground text-sm mt-1">Interactive 3D visualization of high-crime areas and safety statistics</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm">🔍</span>
-                                <select id="dangerFilter" class="bg-secondary border border-border rounded px-3 py-1 text-sm text-foreground">
-                                    <option value="All">All Areas</option>
-                                    <option value="Critical">Critical Danger</option>
-                                    <option value="High">High Danger</option>
-                                    <option value="Medium">Medium Risk</option>
-                                    <option value="Low">Low Risk</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 3D Scene Container -->
-                    <div class="scene-container" id="sceneContainer">
-                        <!-- 3D Map Elements (positioned relative to container) -->
-                        <div class="header-3d">
-                            <h1>Nepal Crime</h1>
-                            <div class="subtitle">3D Analytics Map</div>
-                            <p>Interactive visualization of crime patterns and danger zones</p>
-                        </div>
-
-                        <div class="controls-3d">
-                            <h4>🎮 Controls</h4>
-                            <div>🖱️ Drag to rotate</div>
-                            <div>🔍 Scroll to zoom</div>
-                            <div>👆 Hover dots for details</div>
-                        </div>
-
-                        <div class="legend-3d">
-                            <h4>🎯 Danger Levels</h4>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #dc2626; box-shadow: 0 0 8px rgba(220, 38, 38, 0.5);"></div>
-                                <span>⚠️ Critical</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);"></div>
-                                <span>🔴 High</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #eab308; box-shadow: 0 0 6px rgba(234, 179, 8, 0.5);"></div>
-                                <span>🟡 Medium</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);"></div>
-                                <span>🟢 Low</span>
-                            </div>
-                        </div>
-
-                        <div class="performance-indicator">
-                            ⚡ 3D Interactive
-                        </div>
-
-                        <!-- Loading Screen -->
-                        <div class="loading" id="loading">
-                            <div class="spinner"></div>
-                            <p>Loading 3D Nepal Map...</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Main Content -->
-            <div class="container mx-auto px-4 py-8 space-y-12">
-                <!-- Charts Section -->
-                <section>
-                    <div class="text-center mb-8">
-                        <h2 class="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
-                            📈 Crime Trends Analysis
-                        </h2>
-                        <p class="text-muted-foreground text-lg">Comprehensive breakdown of crime patterns and historical trends</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                        <!-- Bar Chart -->
-                        <div class="animate-fade-in delay-300">
-                            <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
-                                <div class="flex flex-col space-y-1.5 p-6 pb-4">
-                                    <h3 class="tracking-tight text-xl font-bold text-foreground">Crime Trends by Type - 2024</h3>
-                                    <p class="text-muted-foreground text-sm">Monthly breakdown of different crime types across Nepal</p>
-                                </div>
-                                <div class="p-6 pt-0">
-                                    <div class="h-96 w-full">
-                                        <canvas id="barChart" class="w-full h-full"></canvas>
-                                    </div>
-                                    
-                                    <!-- Legend -->
-                                    <div class="flex flex-wrap gap-4 mt-4 justify-center">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(59, 130, 246);"></div>
-                                            <span class="text-sm text-muted-foreground">Theft</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(239, 68, 68);"></div>
-                                            <span class="text-sm text-muted-foreground">Assault</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(245, 158, 11);"></div>
-                                            <span class="text-sm text-muted-foreground">Fraud</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(220, 38, 38);"></div>
-                                            <span class="text-sm text-muted-foreground">Homicide</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(124, 58, 237);"></div>
-                                            <span class="text-sm text-muted-foreground">Trafficking</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(6, 182, 212);"></div>
-                                            <span class="text-sm text-muted-foreground">Cyber Crime</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Line Chart -->
-                        <div class="animate-fade-in delay-500">
-                            <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
-                                <div class="flex flex-col space-y-1.5 p-6 pb-4">
-                                    <div class="flex items-center justify-between flex-wrap gap-4">
-                                        <div>
-                                            <h3 class="tracking-tight text-xl font-bold text-foreground">Overall Crime Trends in Nepal</h3>
-                                            <p class="text-muted-foreground text-sm mt-1">Total crimes reported annually from 2019-2024</p>
-                                        </div>
-                                        <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-red-500/10 text-red-400">
-                                            📈
-                                            <span class="text-sm font-medium">+7.5%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="p-6 pt-0">
-                                    <div class="h-80 w-full">
-                                        <canvas id="lineChart" class="w-full h-full"></canvas>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-4 mt-6">
-                                        <div class="bg-secondary/50 p-4 rounded-lg border border-border">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <span class="text-sm">⚠️</span>
-                                                <span class="text-sm text-muted-foreground">Peak Year</span>
-                                            </div>
-                                            <p class="text-lg font-semibold text-foreground">2024</p>
-                                            <p class="text-xs text-muted-foreground">30,200 cases</p>
-                                        </div>
-                                        <div class="bg-secondary/50 p-4 rounded-lg border border-border">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <span class="text-sm">📈</span>
-                                                <span class="text-sm text-muted-foreground">Avg. Growth</span>
-                                            </div>
-                                            <p class="text-lg font-semibold text-foreground">5.2%</p>
-                                            <p class="text-xs text-muted-foreground">per year</p>
-                                        </div>
-                                        <div class="bg-secondary/50 p-4 rounded-lg border border-border">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <span class="text-sm">🛡️</span>
-                                                <span class="text-sm text-muted-foreground">Most Common</span>
-                                            </div>
-                                            <p class="text-lg font-semibold text-foreground">Theft</p>
-                                            <p class="text-xs text-muted-foreground">37% of all crimes</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+    <!-- Initial Popup Overlay -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-content">
+            <h2><i class="fas fa-balance-scale"></i> Welcome to Nyaya Sathi</h2>
+            <p>In which subject of matter are you facing the problem?</p>
+            <select id="legal-matter">
+                <option value="" disabled selected>Select a legal matter</option>
+                <option value="fraud & forgery">Fraud & Forgery</option>
+                <option value="corruption">Corruption</option>
+                <option value="murder">Murder</option>
+                <option value="harassment">Harassment</option>
+                <option value="rape">Rape</option>
+                <option value="cyber crime">Cyber Crime</option>
+                <option value="other">Other</option>
+            </select>
+            <button id="submit-matter">Continue</button>
         </div>
     </div>
-
-    <!-- Tooltip (positioned fixed so it can appear outside the container) -->
-    <div class="tooltip-3d" id="tooltip">
-        <h3 id="tooltipTitle"></h3>
-        <div class="stats">
-            <div class="stat">
-                <div class="label">📊 Cases</div>
-                <div class="value" id="tooltipCases"></div>
+    
+    <!-- Lawyer Recommendation Section -->
+    <div class="lawyer-recommendation" id="lawyer-recommendation">
+        <h3><i class="fas fa-gavel"></i> Recommended Lawyers</h3>
+        <div id="recommended-lawyers">
+            <!-- Lawyer cards will be inserted here -->
+        </div>
+    </div>
+    
+    <header class="header">
+        <h1><i class="fas fa-balance-scale"></i> Nyaya Sathi</h1>
+    </header>
+    
+    <main class="chat-container" id="chat-messages">
+        {% if not chat_history %}
+        <div class="message message-bot">
+            <div class="avatar avatar-bot">
+                <i class="fas fa-robot"></i>
             </div>
-            <div class="stat">
-                <div class="label">👥 Population</div>
-                <div class="value" id="tooltipPopulation"></div>
-            </div>
-            <div class="stat">
-                <div class="label">🛡️ Safety</div>
-                <div class="value" id="tooltipSafety"></div>
-            </div>
-            <div class="stat">
-                <div class="label">📈 Risk</div>
-                <div class="value" id="tooltipRisk"></div>
+            <div class="message-content">
+                <p>Hello! I'm your legal assistant. Ask me anything about Nepalese law.</p>
+                <p>I can help with:</p>
+                <ul>
+                    <li>Legal procedures</li>
+                    <li>Document requirements</li>
+                    <li>Rights and responsibilities</li>
+                    <li>And other legal queries</li>
+                </ul>
             </div>
         </div>
-        <div class="description">
-            <div class="label">🚨 Primary Crime Types</div>
-            <div class="value" id="tooltipCrimes"></div>
+        {% endif %}
+        
+        {% for chat in chat_history %}
+        <div class="message {% if chat.is_user_message %}message-user{% else %}message-bot{% endif %}">
+            <div class="avatar {% if chat.is_user_message %}avatar-user{% else %}avatar-bot{% endif %}">
+                <i class="fas {% if chat.is_user_message %}fa-user{% else %}fa-robot{% endif %}"></i>
+            </div>
+            <div class="message-content">
+                {% if chat.is_user_message %}
+                    {{ chat.message|linebreaksbr }}
+                {% else %}
+                    {{ chat.response|linebreaks }}
+                {% endif %}
+            </div>
         </div>
-        <div class="risk-assessment">
-            <div class="label" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: flex; justify-content: space-between;">
-                <span>Risk Assessment</span>
-                <span id="tooltipRiskPercent"></span>
+        {% endfor %}
+        
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
             </div>
-            <div class="risk-bar">
-                <div class="risk-fill" id="tooltipRiskBar"></div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
+        </div>
+    </main>
+    
+    <div class="input-container">
+        <div class="input-wrapper">
+            <textarea id="user-input" placeholder="Ask a legal question..." autocomplete="off" rows="1"></textarea>
+            <button id="send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 
     <script>
-        // Crime data
-        const monthlyData = [
-            { month: 'Jan', theft: 934, assault: 450, fraud: 342, homicide: 54, trafficking: 133, cyberCrime: 604 },
-            { month: 'Feb', theft: 887, assault: 423, fraud: 318, homicide: 52, trafficking: 127, cyberCrime: 587 },
-            { month: 'Mar', theft: 945, assault: 467, fraud: 356, homicide: 58, trafficking: 139, cyberCrime: 623 },
-            { month: 'Apr', theft: 912, assault: 441, fraud: 334, homicide: 55, trafficking: 131, cyberCrime: 598 },
-            { month: 'May', theft: 967, assault: 478, fraud: 367, homicide: 61, trafficking: 145, cyberCrime: 641 },
-            { month: 'Jun', theft: 923, assault: 456, fraud: 339, homicide: 56, trafficking: 134, cyberCrime: 612 },
-            { month: 'Jul', theft: 989, assault: 489, fraud: 378, homicide: 63, trafficking: 149, cyberCrime: 658 },
-            { month: 'Aug', theft: 1012, assault: 501, fraud: 389, homicide: 65, trafficking: 153, cyberCrime: 673 },
-            { month: 'Sep', theft: 978, assault: 484, fraud: 372, homicide: 62, trafficking: 147, cyberCrime: 651 },
-            { month: 'Oct', theft: 1034, assault: 512, fraud: 401, homicide: 67, trafficking: 158, cyberCrime: 687 },
-            { month: 'Nov', theft: 998, assault: 494, fraud: 384, homicide: 64, trafficking: 151, cyberCrime: 664 },
-            { month: 'Dec', theft: 1056, assault: 523, fraud: 412, homicide: 69, trafficking: 162, cyberCrime: 701 },
-        ];
-
-        const yearlyData = [
-            { year: 2019, totalCrimes: 23450 },
-            { year: 2020, totalCrimes: 21200 },
-            { year: 2021, totalCrimes: 24800 },
-            { year: 2022, totalCrimes: 26300 },
-            { year: 2023, totalCrimes: 28100 },
-            { year: 2024, totalCrimes: 30200 },
-        ];
-
-        // Initialize charts
-        function initializeCharts() {
-            initBarChart();
-            initLineChart();
-        }
-
-        function initBarChart() {
-            const ctx = document.getElementById('barChart').getContext('2d');
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: monthlyData.map(d => d.month),
-                    datasets: [
-                        {
-                            label: 'Theft',
-                            data: monthlyData.map(d => d.theft),
-                            backgroundColor: 'rgb(59, 130, 246)',
-                            stack: 'crimes'
-                        },
-                        {
-                            label: 'Assault',
-                            data: monthlyData.map(d => d.assault),
-                            backgroundColor: 'rgb(239, 68, 68)',
-                            stack: 'crimes'
-                        },
-                        {
-                            label: 'Fraud',
-                            data: monthlyData.map(d => d.fraud),
-                            backgroundColor: 'rgb(245, 158, 11)',
-                            stack: 'crimes'
-                        },
-                        {
-                            label: 'Homicide',
-                            data: monthlyData.map(d => d.homicide),
-                            backgroundColor: 'rgb(220, 38, 38)',
-                            stack: 'crimes'
-                        },
-                        {
-                            label: 'Trafficking',
-                            data: monthlyData.map(d => d.trafficking),
-                            backgroundColor: 'rgb(124, 58, 237)',
-                            stack: 'crimes'
-                        },
-                        {
-                            label: 'Cyber Crime',
-                            data: monthlyData.map(d => d.cyberCrime),
-                            backgroundColor: 'rgb(6, 182, 212)',
-                            stack: 'crimes'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 2000, easing: 'easeOutQuart' },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'hsl(220, 13%, 8%)',
-                            titleColor: 'hsl(0, 0%, 95%)',
-                            bodyColor: 'hsl(215, 20.2%, 65.1%)',
-                            borderColor: 'hsl(220, 13%, 18%)',
-                            borderWidth: 1
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: 'hsl(215, 20.2%, 65.1%)' },
-                            grid: { color: 'hsl(220, 13%, 18%)' }
-                        },
-                        y: {
-                            ticks: { color: 'hsl(215, 20.2%, 65.1%)' },
-                            grid: { color: 'hsl(220, 13%, 18%)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function initLineChart() {
-            const ctx = document.getElementById('lineChart').getContext('2d');
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: yearlyData.map(d => d.year),
-                    datasets: [{
-                        label: 'Total Crimes',
-                        data: yearlyData.map(d => d.totalCrimes),
-                        borderColor: 'hsl(213, 94%, 50%)',
-                        backgroundColor: 'hsl(213, 94%, 50%, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        pointBackgroundColor: 'hsl(45, 100%, 50%)',
-                        pointBorderColor: 'hsl(213, 94%, 50%)',
-                        pointBorderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 2500, easing: 'easeOutQuart' },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'hsl(220, 13%, 8%)',
-                            titleColor: 'hsl(0, 0%, 95%)',
-                            bodyColor: 'hsl(215, 20.2%, 65.1%)',
-                            borderColor: 'hsl(220, 13%, 18%)',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Total Crimes: ${context.parsed.y.toLocaleString()}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: 'hsl(215, 20.2%, 65.1%)' },
-                            grid: { color: 'hsl(220, 13%, 18%)' }
-                        },
-                        y: {
-                            ticks: { 
-                                color: 'hsl(215, 20.2%, 65.1%)',
-                                callback: function(value) {
-                                    return (value / 1000).toFixed(0) + 'k';
-                                }
-                            },
-                            grid: { color: 'hsl(220, 13%, 18%)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 3D Map functionality
-        function latLongToPosition(lat, long) {
-            // Nepal's geographic bounds
-            const minLong = 80.058;  // West (Nepalgunj)
-            const maxLong = 88.201;  // East (Biratnagar)
-            const minLat = 26.347;   // South (Birgunj)
-            const maxLat = 30.447;   // North (Himalayas)
-
-            // Normalize to 3D space (-1 to 1 range)
-            const x = (long - 84.0) / 2.0;  // 84°E = center (0), ±2.0 range
-            const z = -((lat - 28.0) / 2.0); // 28°N = center (0), inverted for 3D
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const popupOverlay = document.getElementById('popup-overlay');
+            const legalMatterSelect = document.getElementById('legal-matter');
+            const submitMatterButton = document.getElementById('submit-matter');
+            const lawyerRecommendation = document.getElementById('lawyer-recommendation');
+            const recommendedLawyers = document.getElementById('recommended-lawyers');
             
-            return {
-                x: x * 1.5,  // Scale horizontally for better spread
-                y: 0.15,     // Slight elevation
-                z: z * 1.2   // Scale vertically
+            // Lawyer database
+            const lawyers = {
+                'murder': [
+                    {
+                        name: 'Pratik Neupane',
+                        specialization: 'Criminal Defense Lawyer',
+                        location: 'Butwal',
+                        experience: '10 years',
+                        rating: 4.7,
+                        phone: '+977-9841234567'
+                    },
+                    {
+                        name: 'Adv. Suman Thapa',
+                        specialization: 'Homicide Cases Specialist',
+                        location: 'Lalitpur',
+                        experience: '8 years',
+                        rating: 4.5,
+                        phone: '+977-9856789012'
+                    },
+                    {
+                        name: 'Adv. Prakash Neupane',
+                        specialization: 'Criminal Law Expert',
+                        location: 'Bhaktapur',
+                        experience: '10 years',
+                        rating: 4.6,
+                        phone: '+977-9812345678'
+                    }
+                ],
+                'rape': [
+                    {
+                        name: 'Adv. Anita Gurung',
+                        specialization: 'Women & Child Rights Lawyer',
+                        location: 'Kathmandu',
+                        experience: '10 years',
+                        rating: 4.9,
+                        phone: '+977-9812345678'
+                    },
+                    {
+                        name: 'Adv. Sunita Sharma',
+                        specialization: 'Gender Violence Specialist',
+                        location: 'Lalitpur',
+                        experience: '7 years',
+                        rating: 4.8,
+                        phone: '+977-9854321098'
+                    }
+                ],
+                'harassment': [
+                    {
+                        name: 'Adv. Bikram Thapa',
+                        specialization: 'Human Rights Lawyer',
+                        location: 'Bhaktapur',
+                        experience: '7 years',
+                        rating: 4.3,
+                        phone: '+977-9865432109'
+                    },
+                    {
+                        name: 'Adv. Priya Basnet',
+                        specialization: 'Workplace Harassment Expert',
+                        location: 'Kathmandu',
+                        experience: '5 years',
+                        rating: 4.2,
+                        phone: '+977-9876543210'
+                    }
+                ],
+                'fraud & forgery': [
+                    {
+                        name: 'Adv. Sanjay Basnet',
+                        specialization: 'Financial Crimes Lawyer',
+                        location: 'Kathmandu',
+                        experience: '15 years',
+                        rating: 4.6,
+                        phone: '+977-9876543210'
+                    },
+                    {
+                        name: 'Adv. Ramesh Khadka',
+                        specialization: 'White Collar Crimes',
+                        location: 'Lalitpur',
+                        experience: '12 years',
+                        rating: 4.5,
+                        phone: '+977-9811223344'
+                    }
+                ],
+                'corruption': [
+                    {
+                        name: 'Adv. Ramesh Pandey',
+                        specialization: 'Anti-Corruption Lawyer',
+                        location: 'Kathmandu',
+                        experience: '14 years',
+                        rating: 4.8,
+                        phone: '+977-9832145678'
+                    },
+                    {
+                        name: 'Adv. Gopal Shrestha',
+                        specialization: 'Public Interest Litigation',
+                        location: 'Bhaktapur',
+                        experience: '9 years',
+                        rating: 4.4,
+                        phone: '+977-9845678901'
+                    }
+                ],
+                'cyber crime': [
+                    {
+                        name: 'Anjila Sharma',
+                        specialization: 'Cyber Law Expert',
+                        location: 'Lalitpur',
+                        experience: '9 years',
+                        rating: 4.7,
+                        phone: '+977-9854321098'
+                    },
+                    {
+                        name: 'Adv. Anil Joshi',
+                        specialization: 'Digital Forensics Specialist',
+                        location: 'Kathmandu',
+                        experience: '6 years',
+                        rating: 4.3,
+                        phone: '+977-9865432109'
+                    }
+                ]
             };
-        }
-
-        const crimeLocations = [
-            // Kathmandu (27.7172°N, 85.3240°E)
-            {
-                id: 'kathmandu',
-                name: 'Kathmandu',
-                position: latLongToPosition(27.7172, 85.3240),
-                dangerLevel: 'critical',
-                cases: 4850,
-                population: '1.4M',
-                safetyIndex: '2.1/10',
-                riskPercent: 95,
-                crimes: 'Cyber Crime, Theft, Fraud',
-                description: 'Capital city with highest crime density'
-            },
-            // Pokhara (28.2096°N, 83.9856°E)
-            {
-                id: 'pokhara',
-                name: 'Pokhara',
-                position: latLongToPosition(28.2096, 83.9856),
-                dangerLevel: 'low',
-                cases: 890,
-                population: '518K',
-                safetyIndex: '6.8/10',
-                riskPercent: 25,
-                crimes: 'Theft, Minor Assault',
-                description: 'Tourist hub with relatively low crime'
-            },
-            // Birgunj (27.0006°N, 84.8775°E)
-            {
-                id: 'birgunj',
-                name: 'Heatuda',
-                position: latLongToPosition(27.0006, 84.8775),
-                dangerLevel: 'critical',
-                cases: 2150,
-                population: '240K',
-                safetyIndex: '2.8/10',
-                riskPercent: 92,
-                crimes: 'Border Crime, Smuggling, Trafficking',
-                description: 'Major border crossing with high crime'
-            },
-            // Biratnagar (26.4525°N, 87.2718°E)
-            {
-                id: 'biratnagar',
-                name: 'Biratnagar',
-                position: latLongToPosition(27.23, 88.50),
-                dangerLevel: 'high',
-                cases: 1680,
-                population: '242K',
-                safetyIndex: '3.9/10',
-                riskPercent: 75,
-                crimes: 'Border Crime, Theft, Drug Trafficking',
-                description: 'Eastern border city with significant crime'
-            },
-            // Nepalgunj (28.0500°N, 81.6167°E)
-            {
-                id: 'nepalgunj',
-                name: 'Rukum',
-                position: latLongToPosition(28.0500, 81.6167),
-                dangerLevel: 'low',
-                cases: 950,
-                population: '13K',
-                safetyIndex: '8/10',
-                riskPercent: 70,
-                crimes: 'Theft, Trafficking',
-                description: 'Western border with crime issues'
-            }
-        ];
-
-        // Three.js variables
-        let scene, camera, renderer, controls, loader;
-        let raycaster, mouse;
-        let nepalModel, markers = [];
-        let hoveredMarker = null;
-
-        // DOM elements
-        const sceneContainer = document.getElementById('sceneContainer');
-        const loading = document.getElementById('loading');
-        const tooltip = document.getElementById('tooltip');
-
-        // Initialize the 3D scene
-        function initScene() {
-            // Scene setup
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0f172a);
-
-            // Camera setup
-            camera = new THREE.PerspectiveCamera(55, sceneContainer.clientWidth / sceneContainer.clientHeight, 0.1, 1000);
-            camera.position.set(0, 5, 6);
-
-            // Renderer setup
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.setClearColor(0x0f172a);
             
-            // Clear any existing canvas
-            const existingCanvas = sceneContainer.querySelector('canvas');
-            if (existingCanvas) {
-                sceneContainer.removeChild(existingCanvas);
-            }
+            // Show popup on page load
+            popupOverlay.style.display = 'flex';
             
-            sceneContainer.insertBefore(renderer.domElement, sceneContainer.firstChild);
-
-            // Controls
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.maxDistance = 12;
-            controls.minDistance = 3;
-            controls.maxPolarAngle = Math.PI / 2.2;
-
-            // Raycaster for mouse interactions
-            raycaster = new THREE.Raycaster();
-            mouse = new THREE.Vector2();
-
-            // GLTF Loader
-            loader = new THREE.GLTFLoader();
-
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
-            scene.add(ambientLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            directionalLight.position.set(8, 12, 6);
-            directionalLight.castShadow = true;
-            scene.add(directionalLight);
-
-            const pointLight = new THREE.PointLight(0x4f46e5, 0.4, 50);
-            pointLight.position.set(-8, 8, -8);
-            scene.add(pointLight);
-
-            const spotLight = new THREE.SpotLight(0xf1f5f9, 0.5, 0, 0.6, 0.3);
-            spotLight.position.set(0, 10, 0);
-            scene.add(spotLight);
-
-            // Ground plane
-            const groundGeometry = new THREE.PlaneGeometry(12, 12);
-            const groundMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x0f172a,
-                roughness: 0.9,
-                metalness: 0.1
-            });
-            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-            ground.rotation.x = -Math.PI / 2;
-            ground.position.y = -0.15;
-            ground.receiveShadow = true;
-            scene.add(ground);
-
-            // Load Nepal GLB model
-            loadNepalModel();
-            
-            // Create crime markers
-            createCrimeMarkers();
-
-            // Event listeners
-            window.addEventListener('resize', onWindowResize);
-            renderer.domElement.addEventListener('mousemove', onMouseMove);
-            renderer.domElement.addEventListener('click', onMouseClick);
-
-            // Hide loading screen
-            loading.style.display = 'none';
-
-            // Start animation loop
-            animate();
-        }
-
-        function loadNepalModel() {
-            loader.load(
-                'https://cdn.builder.io/o/assets%2Ff94f139dc8e648d7ad4dea7ce579fa2f%2F1ff862cf119d421a94ffe93962ee20ab?alt=media&token=39f12243-db6d-4341-be24-c69b30bbc63a&apiKey=f94f139dc8e648d7ad4dea7ce579fa2f',
-                (gltf) => {
-                    nepalModel = gltf.scene;
-                    nepalModel.scale.set(4, 4, 4);
-                    nepalModel.position.set(0, -0.2, 0);
+            // Handle legal matter selection
+            submitMatterButton.addEventListener('click', function() {
+                const selectedMatter = legalMatterSelect.value;
+                if (selectedMatter) {
+                    popupOverlay.style.display = 'none';
+                    addMessage(`I need help with: ${selectedMatter}`, true);
                     
-                    // Configure materials
-                    nepalModel.traverse((child) => {
-                        if (child.isMesh) {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
-                            if (child.material) {
-                                if (Array.isArray(child.material)) {
-                                    child.material.forEach((mat) => {
-                                        if (mat instanceof THREE.MeshStandardMaterial) {
-                                            mat.roughness = 0.7;
-                                            mat.metalness = 0.2;
-                                        }
-                                    });
-                                } else if (child.material instanceof THREE.MeshStandardMaterial) {
-                                    child.material.roughness = 0.7;
-                                    child.material.metalness = 0.2;
-                                }
-                            }
+                    // Show typing indicator
+                    typingIndicator.style.display = 'flex';
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Simulate bot response after a delay
+                    setTimeout(() => {
+                        typingIndicator.style.display = 'none';
+                        let response = '';
+                        
+                        switch(selectedMatter) {
+                            case 'fraud & forgery':
+                                response = "I understand you're dealing with fraud or forgery issues. In Nepal, these are serious offenses under the Muluki Criminal Code. Can you please provide more details about your situation?";
+                                break;
+                            case 'corruption':
+                                response = "Corruption cases are handled seriously in Nepal. The Commission for the Investigation of Abuse of Authority (CIAA) investigates such cases. What specific information do you need?";
+                                break;
+                            case 'murder':
+                                response = "Murder cases are grave offenses. In Nepal, the punishment can be life imprisonment  depending on circumstances. Please share more details about your case.";
+                                break;
+                            case 'harassment':
+                                response = "Harassment, including sexual harassment, is punishable under Nepalese law. The severity depends on the nature of the harassment. Could you elaborate on your situation?";
+                                break;
+                            case 'rape':
+                                response = "Rape is a heinous crime with strict punishments in Nepal. The law provides strong protections for victims. Would you like information about legal procedures or victim support services?";
+                                break;
+                            case 'cyber crime':
+                                response = "Cyber crimes are covered under the Electronic Transactions Act in Nepal. These can include hacking, online fraud, or cyber bullying. What specific issue are you facing?";
+                                break;
+                            default:
+                                response = "I understand you need legal assistance. Please describe your situation in more detail so I can provide the most relevant information.";
                         }
+                        
+                        const botMessageDiv = document.createElement('div');
+                        botMessageDiv.classList.add('message', 'message-bot');
+                        
+                        const botAvatar = document.createElement('div');
+                        botAvatar.classList.add('avatar', 'avatar-bot');
+                        botAvatar.innerHTML = '<i class="fas fa-robot"></i>';
+                        
+                        const botContent = document.createElement('div');
+                        botContent.classList.add('message-content');
+                        
+                        botMessageDiv.appendChild(botAvatar);
+                        botMessageDiv.appendChild(botContent);
+                        chatMessages.insertBefore(botMessageDiv, typingIndicator);
+                        
+                        // Type the message and show lawyers after 5 seconds
+                        typeMessage(response, botContent, selectedMatter);
+                    }, 1500);
+                }
+            });
+            
+            // Show recommended lawyers (max 3) after 5 seconds
+            function showLawyers(caseType) {
+                const caseLawyers = lawyers[caseType];
+                if (caseLawyers && caseLawyers.length > 0) {
+                    recommendedLawyers.innerHTML = '';
+                    
+                    // Limit to max 3 lawyers
+                    const lawyersToShow = caseLawyers.slice(0, 3);
+                    
+                    lawyersToShow.forEach(lawyer => {
+                        const lawyerCard = document.createElement('div');
+                        lawyerCard.className = 'lawyer-card';
+                        lawyerCard.innerHTML = `
+                            <strong>${lawyer.name}</strong>
+                            <p>${lawyer.specialization}</p>
+                            <small>${lawyer.location}, ${lawyer.experience} experience</small>
+                            <div class="lawyer-rating">
+                                ${'<i class="fas fa-star"></i>'.repeat(Math.floor(lawyer.rating))}
+                                ${lawyer.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                ${lawyer.rating} (${Math.floor(lawyer.rating * 10)} reviews)
+                            </div>
+                            <div class="lawyer-contact">
+                                <button onclick="alert('Connecting to ${lawyer.name} at ${lawyer.phone}')">
+                                    <i class="fas fa-phone"></i> Contact
+                                </button>
+                            </div>
+                        `;
+                        recommendedLawyers.appendChild(lawyerCard);
                     });
                     
-                    scene.add(nepalModel);
-                },
-                (progress) => {
-                    console.log('Loading progress:', progress);
-                },
-                (error) => {
-                    console.error('Error loading GLB model:', error);
-                    // Create fallback terrain if GLB fails
-                    createFallbackTerrain();
+                    // Show after 5 seconds
+                    setTimeout(() => {
+                        lawyerRecommendation.style.display = 'flex';
+                    }, 5000);
                 }
-            );
-        }
-
-        function createFallbackTerrain() {
-            // Simple fallback Nepal shape
-            const shape = new THREE.Shape();
-            shape.moveTo(-2.2, -0.8);
-            shape.lineTo(-1.8, 0.3);
-            shape.lineTo(-1.2, 0.6);
-            shape.lineTo(-0.6, 0.7);
-            shape.lineTo(-0.2, 0.8);
-            shape.lineTo(0.3, 0.7);
-            shape.lineTo(0.8, 0.6);
-            shape.lineTo(1.4, 0.5);
-            shape.lineTo(1.9, 0.3);
-            shape.lineTo(2.2, 0.1);
-            shape.lineTo(2.1, -0.3);
-            shape.lineTo(1.8, -0.6);
-            shape.lineTo(1.3, -0.8);
-            shape.lineTo(0.7, -0.9);
-            shape.lineTo(0.1, -0.85);
-            shape.lineTo(-0.5, -0.8);
-            shape.lineTo(-1.2, -0.75);
-            shape.lineTo(-1.8, -0.7);
-            shape.lineTo(-2.2, -0.8);
-
-            const extrudeSettings = {
-                depth: 0.2,
-                bevelEnabled: true,
-                bevelThickness: 0.05,
-                bevelSize: 0.02,
-                bevelSegments: 5
-            };
-
-            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            const material = new THREE.MeshLambertMaterial({ 
-                color: 0x2d4a3d,
-                transparent: true,
-                opacity: 0.9
-            });
-
-            const fallbackMesh = new THREE.Mesh(geometry, material);
-            fallbackMesh.rotation.x = -Math.PI / 2;
-            fallbackMesh.position.y = -0.1;
-            fallbackMesh.castShadow = true;
-            fallbackMesh.receiveShadow = true;
-            scene.add(fallbackMesh);
-        }
-
-        function createCrimeMarkers() {
-            markers = [];
-            
-            crimeLocations.forEach(location => {
-                const markerGroup = new THREE.Group();
-                markerGroup.userData = { location };
-
-                // Get marker color based on danger level
-                const color = getDangerColor(location.dangerLevel);
-                const height = getDangerHeight(location.dangerLevel);
-
-                // Create small dot marker (no labels initially)
-                const markerGeometry = new THREE.SphereGeometry(0.06, 12, 8);
-                const markerMaterial = new THREE.MeshStandardMaterial({
-                    color: color,
-                    emissive: color,
-                    emissiveIntensity: 0.4,
-                    metalness: 0.1,
-                    roughness: 0.7
-                });
-
-                const markerMesh = new THREE.Mesh(markerGeometry, markerMaterial);
-                markerMesh.position.copy(location.position);
-                markerMesh.castShadow = true;
-
-                // Add subtle pulsing light
-                const light = new THREE.PointLight(color, 0.8, 1.5);
-                light.position.copy(markerMesh.position);
-                light.position.y += 0.1;
-
-                // Add very subtle glow effect
-                const glowGeometry = new THREE.SphereGeometry(0.08, 8, 6);
-                const glowMaterial = new THREE.MeshBasicMaterial({
-                    color: color,
-                    transparent: true,
-                    opacity: 0.2
-                });
-                const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
-                glowMesh.position.copy(markerMesh.position);
-
-                markerGroup.add(markerMesh);
-                markerGroup.add(light);
-                markerGroup.add(glowMesh);
-
-                scene.add(markerGroup);
-                markers.push(markerGroup);
-            });
-        }
-
-        function getDangerColor(level) {
-            switch (level) {
-                case 'critical': return 0xdc2626;
-                case 'high': return 0xef4444;
-                case 'medium': return 0xeab308;
-                case 'low': return 0x22c55e;
-                default: return 0x6b7280;
-            }
-        }
-
-        function getDangerHeight(level) {
-            switch (level) {
-                case 'critical': return 0.3;
-                case 'high': return 0.25;
-                case 'medium': return 0.2;
-                case 'low': return 0.15;
-                default: return 0.1;
-            }
-        }
-
-        function onMouseMove(event) {
-            const rect = renderer.domElement.getBoundingClientRect();
-            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(markers, true);
-
-            if (intersects.length > 0) {
-                const intersected = intersects[0].object.parent;
-                if (hoveredMarker !== intersected) {
-                    if (hoveredMarker) {
-                        resetMarkerScale(hoveredMarker);
-                    }
-                    hoveredMarker = intersected;
-                    highlightMarker(hoveredMarker);
-                    showTooltip(event, hoveredMarker.userData.location);
-                }
-                updateTooltipPosition(event);
-            } else {
-                if (hoveredMarker) {
-                    resetMarkerScale(hoveredMarker);
-                    hoveredMarker = null;
-                }
-                hideTooltip();
-            }
-        }
-
-        function onMouseClick(event) {
-            if (hoveredMarker) {
-                const location = hoveredMarker.userData.location;
-                console.log(`Clicked on ${location.name}: ${location.cases} cases`);
-            }
-        }
-
-        function highlightMarker(marker) {
-            marker.children.forEach(child => {
-                if (child.isMesh) {
-                    child.scale.setScalar(1.5);
-                }
-                if (child.isPointLight) {
-                    child.intensity = 1.5;
-                }
-            });
-        }
-
-        function resetMarkerScale(marker) {
-            marker.children.forEach(child => {
-                if (child.isMesh) {
-                    child.scale.setScalar(1);
-                }
-                if (child.isPointLight) {
-                    child.intensity = 0.8;
-                }
-            });
-        }
-
-        function showTooltip(event, location) {
-            const tooltipTitle = document.getElementById('tooltipTitle');
-            const tooltipCases = document.getElementById('tooltipCases');
-            const tooltipPopulation = document.getElementById('tooltipPopulation');
-            const tooltipSafety = document.getElementById('tooltipSafety');
-            const tooltipRisk = document.getElementById('tooltipRisk');
-            const tooltipCrimes = document.getElementById('tooltipCrimes');
-            const tooltipRiskPercent = document.getElementById('tooltipRiskPercent');
-            const tooltipRiskBar = document.getElementById('tooltipRiskBar');
-
-            tooltipTitle.innerHTML = `📍 ${location.name} <span class="danger-badge" style="background: ${getDangerColorHex(location.dangerLevel)};">${location.dangerLevel}</span>`;
-            tooltipCases.textContent = location.cases.toLocaleString();
-            tooltipPopulation.textContent = location.population;
-            tooltipSafety.textContent = location.safetyIndex;
-            tooltipRisk.textContent = `${location.riskPercent}%`;
-            tooltipCrimes.textContent = location.crimes;
-            tooltipRiskPercent.textContent = `${location.riskPercent}%`;
-
-            tooltipRiskBar.style.width = `${location.riskPercent}%`;
-            tooltipRiskBar.style.background = getDangerColorHex(location.dangerLevel);
-
-            tooltip.classList.add('show');
-            updateTooltipPosition(event);
-        }
-
-        function hideTooltip() {
-            tooltip.classList.remove('show');
-        }
-
-        function updateTooltipPosition(event) {
-            const x = event.clientX;
-            const y = event.clientY;
-
-            let tooltipX = x + 15;
-            let tooltipY = y - 10;
-
-            if (tooltipX + 320 > window.innerWidth) {
-                tooltipX = x - 335;
-            }
-            if (tooltipY < 0) {
-                tooltipY = y + 15;
-            }
-
-            tooltip.style.left = `${tooltipX}px`;
-            tooltip.style.top = `${tooltipY}px`;
-        }
-
-        function getDangerColorHex(level) {
-            switch (level) {
-                case 'critical': return '#dc2626';
-                case 'high': return '#ef4444';
-                case 'medium': return '#eab308';
-                case 'low': return '#22c55e';
-                default: return '#6b7280';
-            }
-        }
-
-        function onWindowResize() {
-            camera.aspect = sceneContainer.clientWidth / sceneContainer.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
-        }
- let swayAngle = 0;
-    let swayDirection = 1;
-    const maxSwayAngle = 8; // Reduced from 15 to make movement more subtle
-    const swaySpeed = 0.02; // Slower speed
-    let isSwaying = true;
-    let swayPauseTimer = 0;
-    const swayDuration = 3000; // 3 seconds of swaying
-    const pauseDuration = 5000; // 5 seconds pause
-
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        // Smooth swaying animation with pauses
-        const now = Date.now();
-        
-        if (isSwaying) {
-            swayAngle += swaySpeed * swayDirection;
-            
-            // Reverse direction at limits
-            if (Math.abs(swayAngle) >= maxSwayAngle) {
-                swayDirection *= -1;
             }
             
-            // Check if we should pause
-            if (now - swayPauseTimer > swayDuration) {
-                isSwaying = false;
-                swayPauseTimer = now;
-            }
-        } else {
-            // Check if we should resume swaying
-            if (now - swayPauseTimer > pauseDuration) {
-                isSwaying = true;
-                swayPauseTimer = now;
-            }
-        }
-        
-        // Apply rotation to Nepal model if it exists
-        if (nepalModel) {
-            // Smooth the transition when starting/switching directions
-            const targetAngle = isSwaying ? swayAngle : 0;
-            nepalModel.rotation.y = THREE.MathUtils.lerp(
-                nepalModel.rotation.y, 
-                THREE.MathUtils.degToRad(targetAngle), 
-                0.05
-            );
-        }
-        
-        // Update controls (but disable auto-rotate)
-        if (controls) {
-            controls.autoRotate = false;
-            controls.update();
-        }
-        
-        // Rest of your animation code...
-        renderer.render(scene, camera);
-    }
-      
-
-        // Filter functionality
-        document.getElementById('dangerFilter').addEventListener('change', function(e) {
-            const filterValue = e.target.value;
+            // Auto-resize textarea
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
             
-            markers.forEach(marker => {
-                const level = marker.userData.location.dangerLevel;
+            function addMessage(text, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(isUser ? 'message-user' : 'message-bot');
                 
-                if (filterValue === 'All' || 
-                    (filterValue === 'Critical' && level === 'critical') ||
-                    (filterValue === 'High' && level === 'high') ||
-                    (filterValue === 'Medium' && level === 'medium') ||
-                    (filterValue === 'Low' && level === 'low')) {
-                    marker.visible = true;
+                const avatarDiv = document.createElement('div');
+                avatarDiv.classList.add('avatar');
+                avatarDiv.classList.add(isUser ? 'avatar-user' : 'avatar-bot');
+                
+                const avatarIcon = document.createElement('i');
+                avatarIcon.classList.add('fas', isUser ? 'fa-user' : 'fa-robot');
+                avatarDiv.appendChild(avatarIcon);
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('message-content');
+                
+                if (!isUser) {
+                    contentDiv.innerHTML = formatResponse(text);
                 } else {
-                    marker.visible = false;
+                    contentDiv.textContent = text;
+                }
+                
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(contentDiv);
+                
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function formatResponse(text) {
+                const paragraphs = text.split('\n\n');
+                let html = '';
+                
+                paragraphs.forEach(para => {
+                    if (para.includes('\n- ') || para.includes('\n* ') || para.includes('\n• ')) {
+                        const listItems = para.split('\n')
+                            .filter(item => item.trim().startsWith('- ') || 
+                                          item.trim().startsWith('* ') || 
+                                          item.trim().startsWith('• '))
+                            .map(item => `<li>${item.substring(2).trim()}</li>`)
+                            .join('');
+                        
+                        if (listItems) {
+                            html += `<ul>${listItems}</ul>`;
+                        } else {
+                            html += `<p>${para}</p>`;
+                        }
+                    } else if (para.trim() !== '') {
+                        html += `<p>${para}</p>`;
+                    }
+                });
+                
+                return html;
+            }
+            
+            async function typeMessage(message, element, caseType = null) {
+                const formattedMessage = formatResponse(message);
+                element.innerHTML = '';
+                
+                const tempDiv = document.createElement('div');
+                element.appendChild(tempDiv);
+                
+                let i = 0;
+                const speed = 20;
+                
+                while (i < formattedMessage.length) {
+                    tempDiv.innerHTML = formattedMessage.substring(0, i);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    await new Promise(resolve => setTimeout(resolve, speed));
+                    i++;
+                }
+                
+                element.innerHTML = formattedMessage;
+                
+                // Show lawyers after typing is done if caseType is provided
+                if (caseType) {
+                    showLawyers(caseType);
+                }
+            }
+            
+            async function sendMessageToBackend(message) {
+                try {
+                    const response = await fetch('chat/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                        body: JSON.stringify({ query: message })
+                    });
+                    
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error:', error);
+                    return {response: "Sorry, I encountered an error processing your request."};
+                }
+            }
+            
+            function getCookie(name) {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [cookieName, cookieValue] = cookie.trim().split('=');
+                    if (cookieName === name) return decodeURIComponent(cookieValue);
+                }
+                return null;
+            }
+            
+            async function handleUserInput() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                addMessage(message, true);
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                
+                typingIndicator.style.display = 'flex';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                try {
+                    const {response} = await sendMessageToBackend(message);
+                    typingIndicator.style.display = 'none';
+                    
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.classList.add('message', 'message-bot');
+                    
+                    const botAvatar = document.createElement('div');
+                    botAvatar.classList.add('avatar', 'avatar-bot');
+                    botAvatar.innerHTML = '<i class="fas fa-robot"></i>';
+                    
+                    const botContent = document.createElement('div');
+                    botContent.classList.add('message-content');
+                    
+                    botMessageDiv.appendChild(botAvatar);
+                    botMessageDiv.appendChild(botContent);
+                    chatMessages.insertBefore(botMessageDiv, typingIndicator);
+                    
+                    // Check if response contains legal keywords that might need lawyer recommendation
+                    const legalKeywords = ['lawyer', 'attorney', 'legal counsel', 'represent', 'sue', 'suing', 'case', 'court'];
+                    const hasLegalKeyword = legalKeywords.some(keyword => 
+                        message.toLowerCase().includes(keyword) || response.toLowerCase().includes(keyword)
+                    );
+                    
+                    if (hasLegalKeyword && legalMatterSelect.value) {
+                        await typeMessage(response, botContent, legalMatterSelect.value);
+                    } else {
+                        await typeMessage(response, botContent);
+                    }
+                } catch (error) {
+                    typingIndicator.style.display = 'none';
+                    addMessage("Sorry, I encountered an error processing your request.", false);
+                    console.error(error);
+                }
+            }
+            
+            sendButton.addEventListener('click', handleUserInput);
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleUserInput();
                 }
             });
-        });
-
-        // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-            initScene();
+            
+            // Focus input after popup is closed
+            submitMatterButton.addEventListener('click', function() {
+                setTimeout(() => {
+                    userInput.focus();
+                }, 100);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         });
     </script>
 </body>
