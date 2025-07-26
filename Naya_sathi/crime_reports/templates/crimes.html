@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepal Crime Analytics Dashboard - 3D City Objects</title>
+    <title>Nepal Crime Analytics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         :root {
             --background: 220 13% 6%;
@@ -297,51 +300,361 @@
             height: 2px;
             box-shadow: 0 0 2px rgba(255, 255, 0, 0.5);
         }
+
+        /* 3D Map Styles */
+        .scene-container {
+            width: 100%;
+            height: 600px;
+            position: relative;
+        }
+
+        .header-3d {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .header-3d h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-3d .subtitle {
+            font-size: 2.5rem;
+            color: #ef4444;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header-3d p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+        }
+
+        .controls-3d {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 10px;
+            padding: 12px 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-3d {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+        }
+
+        .legend-3d h4 {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tooltip-3d {
+            position: fixed;
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid rgba(71, 85, 105, 0.8);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 280px;
+            max-width: 320px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .tooltip-3d.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .tooltip-3d h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tooltip-3d .danger-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: auto;
+        }
+
+        .tooltip-3d .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tooltip-3d .stat {
+            background: rgba(51, 65, 85, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .tooltip-3d .stat .label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tooltip-3d .stat .value {
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .tooltip-3d .description {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tooltip-3d .description .label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .tooltip-3d .description .value {
+            font-size: 0.9rem;
+            color: white;
+            line-height: 1.4;
+        }
+
+        .tooltip-3d .risk-assessment {
+            margin-top: 12px;
+        }
+
+        .tooltip-3d .risk-bar {
+            background: rgba(71, 85, 105, 0.5);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .tooltip-3d .risk-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 1000;
+        }
+
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .performance-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .header-3d h1 {
+                font-size: 2.5rem;
+            }
+            .header-3d .subtitle {
+                font-size: 2rem;
+            }
+        }
+
+        /* Tab navigation */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: hsl(var(--secondary));
+            border: 1px solid hsl(var(--border));
+            color: hsl(var(--foreground));
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab-button:first-child {
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+
+        .tab-button:last-child {
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .tab-button.active {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="dark">
-        <div class="min-h-screen bg-background">
-            <!-- Hero Section -->
-            <div class="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/10 border-b border-border">
-                <div class="container mx-auto px-4 py-16">
-                    <div class="text-center max-w-4xl mx-auto">
-                        <h1 class="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-fade-in">
-                            Crime Analytics
-                            <span class="block text-accent text-3xl md:text-5xl mt-2">Nepal Dashboard</span>
-                        </h1>
-                        <p class="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed animate-fade-in delay-100">
-                            Visualizing crime trends and patterns across Nepal to promote awareness and safety
-                        </p>
-                        
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-200">
-                                <div class="text-2xl mb-2">📈</div>
-                                <p class="text-2xl font-bold text-foreground">30,200</p>
-                                <p class="text-sm text-muted-foreground">Total Cases 2024</p>
+    
+
+            <!-- 3D Map Section -->
+            <section class="container mx-auto px-0 py-8 animate-fade-in delay-700">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+                        🗺️ Nepal Crime Dashboard 
+                    </h2>
+                    <p class="text-muted-foreground text-lg">Interactive 3D map showing dangerous areas and safety statistics across Nepal</p>
+                </div>
+                
+                <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
+                    <div class="flex flex-col space-y-1.5 p-6 pb-4">
+                        <div class="flex items-center justify-between flex-wrap gap-4">
+                            <div>
+                                <h3 class="tracking-tight text-xl font-bold text-foreground">Nepal Crime Heatmap</h3>
+                                <p class="text-muted-foreground text-sm mt-1">Interactive 3D visualization of high-crime areas and safety statistics</p>
                             </div>
-                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-300">
-                                <div class="text-2xl mb-2">📊</div>
-                                <p class="text-2xl font-bold text-foreground">+7.4%</p>
-                                <p class="text-sm text-muted-foreground">YoY Change</p>
-                            </div>
-                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-500">
-                                <div class="text-2xl mb-2">📍</div>
-                                <p class="text-2xl font-bold text-foreground">11</p>
-                                <p class="text-sm text-muted-foreground">Monitored Cities</p>
-                            </div>
-                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-700">
-                                <div class="text-2xl mb-2">⚠️</div>
-                                <p class="text-2xl font-bold text-foreground">3,235</p>
-                                <p class="text-sm text-muted-foreground">This Month</p>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm">🔍</span>
+                                <select id="dangerFilter" class="bg-secondary border border-border rounded px-3 py-1 text-sm text-foreground">
+                                    <option value="All">All Areas</option>
+                                    <option value="Critical">Critical Danger</option>
+                                    <option value="High">High Danger</option>
+                                    <option value="Medium">Medium Risk</option>
+                                    <option value="Low">Low Risk</option>
+                                </select>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- 3D Scene Container -->
+                    <div class="scene-container" id="sceneContainer">
+                        <!-- 3D Map Elements (positioned relative to container) -->
+                        <div class="header-3d">
+                            <h1>Nepal Crime</h1>
+                            <div class="subtitle">3D Analytics Map</div>
+                            <p>Interactive visualization of crime patterns and danger zones</p>
+                        </div>
+
+                        <div class="controls-3d">
+                            <h4>🎮 Controls</h4>
+                            <div>🖱️ Drag to rotate</div>
+                            <div>🔍 Scroll to zoom</div>
+                            <div>👆 Hover dots for details</div>
+                        </div>
+
+                        <div class="legend-3d">
+                            <h4>🎯 Danger Levels</h4>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #dc2626; box-shadow: 0 0 8px rgba(220, 38, 38, 0.5);"></div>
+                                <span>⚠️ Critical</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);"></div>
+                                <span>🔴 High</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #eab308; box-shadow: 0 0 6px rgba(234, 179, 8, 0.5);"></div>
+                                <span>🟡 Medium</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);"></div>
+                                <span>🟢 Low</span>
+                            </div>
+                        </div>
+
+                        <div class="performance-indicator">
+                            ⚡ 3D Interactive
+                        </div>
+
+                        <!-- Loading Screen -->
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>Loading 3D Nepal Map...</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Main Content -->
-            <div class="container mx-auto px-4 py-12 space-y-12">
+            <div class="container mx-auto px-4 py-8 space-y-12">
                 <!-- Charts Section -->
                 <section>
                     <div class="text-center mb-8">
@@ -445,1052 +758,42 @@
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+    </div>
 
-                <!-- 3D Map Section -->
-                <section class="animate-fade-in delay-700">
-                    <div class="text-center mb-8">
-                        <h2 class="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
-                            🗺️ Nepal Crime Danger Zones
-                        </h2>
-                        <p class="text-muted-foreground text-lg">Interactive 3D map showing dangerous areas and safety statistics across Nepal</p>
-                    </div>
-                    
-                    <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
-                        <div class="flex flex-col space-y-1.5 p-6 pb-4">
-                            <div class="flex items-center justify-between flex-wrap gap-4">
-                                <div>
-                                    <h3 class="tracking-tight text-xl font-bold text-foreground flex items-center gap-2">
-                                        🎯 Nepal Crime Danger Zones
-                                    </h3>
-                                    <p class="text-muted-foreground text-sm mt-1">Interactive 3D visualization of high-crime areas and safety statistics</p>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm">🔍</span>
-                                    <select id="dangerFilter" class="bg-secondary border border-border rounded px-3 py-1 text-sm text-foreground">
-                                        <option value="All">All Areas</option>
-                                        <option value="Critical">Critical Danger</option>
-                                        <option value="High">High Danger</option>
-                                        <option value="Medium">Medium Risk</option>
-                                        <option value="Low">Low Risk</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Map Container -->
-                        <div class="p-6 pt-0 pb-20">
-                            <div class="h-96 w-full rounded-lg border border-border relative" 
-                                 style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);">
-                                
-                                <!-- Nepal country outline -->
-                                <div class="nepal-outline"></div>
-                                
-                                <!-- Nepal Map with 3D Cities -->
-                                <div class="absolute inset-0">
-                                    <!-- Kathmandu - Critical -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 74%; top: 42%;" data-level="Critical">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6));">
-                                            
-                                            <!-- Pulsing Base Ring -->
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(220, 38, 38); filter: blur(2px);"></div>
-                                            
-                                            <!-- 3D Building Structure -->
-                                            <div class="relative building-main">
-                                                <!-- Main Building Tower -->
-                                                <div class="relative"
-                                                     style="width: 20px; height: 32px; 
-                                                            background: linear-gradient(45deg, rgb(220, 38, 38), rgba(220, 38, 38, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 20px rgba(220, 38, 38, 0.6);">
-                                                    
-                                                    <!-- Building Windows -->
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                    
-                                                    <!-- Building Top -->
-                                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
-                                                         style="width: 8px; height: 4px; 
-                                                                background: linear-gradient(to bottom, rgb(220, 38, 38), rgba(220, 38, 38, 0.7));
-                                                                border-radius: 1px; border: 1px solid rgba(255, 255, 255, 0.3);">
-                                                        
-                                                        <!-- Antenna/Signal Tower -->
-                                                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2"
-                                                             style="width: 1px; height: 6px; 
-                                                                    background: rgba(255, 255, 255, 0.8);
-                                                                    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);">
-                                                            
-                                                            <!-- Signal Rings -->
-                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 border border-white opacity-30 rounded-full animate-ping"></div>
-                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 border border-white opacity-50 rounded-full animate-ping" style="animation-delay: 0.5s;"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Side Buildings -->
-                                                <div class="absolute -left-2 bottom-0 building-side"
-                                                     style="width: 8px; height: 16px; 
-                                                            background: linear-gradient(45deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.5));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 1px 1px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.15);
-                                                            opacity: 0.8;">
-                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
-                                                </div>
-                                                
-                                                <div class="absolute -right-2 bottom-0 building-side"
-                                                     style="width: 6px; height: 12px; 
-                                                            background: linear-gradient(45deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.5));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 1px 1px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.15);
-                                                            opacity: 0.8;">
-                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
-                                                </div>
-                                                
-                                                <!-- Base Platform -->
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 28px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(220, 38, 38, 0.25), rgba(220, 38, 38, 0.5), rgba(220, 38, 38, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <!-- Danger Level Badge -->
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                ⚠️
-                                            </div>
-                                        </div>
-
-                                        <!-- Enhanced Tooltip -->
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <!-- Tooltip Arrow -->
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <!-- Header -->
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Kathmandu</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-red-500 text-white">Critical</div>
-                                                </div>
-                                                
-                                                <!-- Stats Grid -->
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">4,850</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">1.4M</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">2.1/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Cyber Crime, Theft</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Risk Level Bar -->
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">95%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 95%; background-color: rgb(220, 38, 38);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Pokhara - Medium -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 52%; top: 40%;" data-level="Medium">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(217, 119, 6); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 14px; height: 20px; 
-                                                            background: linear-gradient(45deg, rgb(217, 119, 6), rgba(217, 119, 6, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 15px rgba(217, 119, 6, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                    
-                                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
-                                                         style="width: 6px; height: 3px; 
-                                                                background: linear-gradient(to bottom, rgb(217, 119, 6), rgba(217, 119, 6, 0.7));
-                                                                border-radius: 1px; border: 1px solid rgba(255, 255, 255, 0.3);">
-                                                        
-                                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
-                                                             style="width: 1px; height: 4px; 
-                                                                    background: rgba(255, 255, 255, 0.8);
-                                                                    box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);">
-                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 border border-white opacity-30 rounded-full animate-ping"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 20px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(217, 119, 6, 0.25), rgba(217, 119, 6, 0.5), rgba(217, 119, 6, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                🟡
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Pokhara</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-yellow-500 text-white">Medium</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">890</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">518K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">6.8/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Theft, Assault</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">45%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 45%; background-color: rgb(217, 119, 6);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Biratnagar - High -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 95%; top: 45%;" data-level="High">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(234, 88, 12); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 16px; height: 24px; 
-                                                            background: linear-gradient(45deg, rgb(234, 88, 12), rgba(234, 88, 12, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 18px rgba(234, 88, 12, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                    
-                                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
-                                                         style="width: 7px; height: 3px; 
-                                                                background: linear-gradient(to bottom, rgb(234, 88, 12), rgba(234, 88, 12, 0.7));
-                                                                border-radius: 1px; border: 1px solid rgba(255, 255, 255, 0.3);">
-                                                        
-                                                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2"
-                                                             style="width: 1px; height: 5px; 
-                                                                    background: rgba(255, 255, 255, 0.8);
-                                                                    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);">
-                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 border border-white opacity-30 rounded-full animate-ping"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -left-2 bottom-0 building-side"
-                                                     style="width: 7px; height: 14px; 
-                                                            background: linear-gradient(45deg, rgba(234, 88, 12, 0.7), rgba(234, 88, 12, 0.5));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 1px 1px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.15);
-                                                            opacity: 0.8;">
-                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 24px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.5), rgba(234, 88, 12, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                🔴
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Biratnagar</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-orange-500 text-white">High</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">1,680</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">242K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">3.9/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Border Crime, Theft</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">75%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 75%; background-color: rgb(234, 88, 12);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Butwal - High -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 35%; top: 55%;" data-level="High">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(234, 88, 12); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 16px; height: 24px; 
-                                                            background: linear-gradient(45deg, rgb(234, 88, 12), rgba(234, 88, 12, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 18px rgba(234, 88, 12, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -left-2 bottom-0 building-side"
-                                                     style="width: 7px; height: 14px; 
-                                                            background: linear-gradient(45deg, rgba(234, 88, 12, 0.7), rgba(234, 88, 12, 0.5));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 1px 1px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.15);
-                                                            opacity: 0.8;">
-                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 24px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.5), rgba(234, 88, 12, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                🔴
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Butwal</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-orange-500 text-white">High</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">1,240</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">195K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">4.2/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Trafficking, Theft</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">72%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 72%; background-color: rgb(234, 88, 12);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Janakpur - High -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 82%; top: 48%;" data-level="High">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(234, 88, 12); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 16px; height: 24px; 
-                                                            background: linear-gradient(45deg, rgb(234, 88, 12), rgba(234, 88, 12, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 18px rgba(234, 88, 12, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 24px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.5), rgba(234, 88, 12, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                🔴
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Janakpur</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-orange-500 text-white">High</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">1,420</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">173K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">3.6/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Trafficking, Theft</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">78%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 78%; background-color: rgb(234, 88, 12);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Birgunj - Critical -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 75%; top: 52%;" data-level="Critical">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(220, 38, 38); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 20px; height: 32px; 
-                                                            background: linear-gradient(45deg, rgb(220, 38, 38), rgba(220, 38, 38, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 20px rgba(220, 38, 38, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -left-2 bottom-0 building-side"
-                                                     style="width: 8px; height: 16px; 
-                                                            background: linear-gradient(45deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.5));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 1px 1px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.15);
-                                                            opacity: 0.8;">
-                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 28px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(220, 38, 38, 0.25), rgba(220, 38, 38, 0.5), rgba(220, 38, 38, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                ⚠️
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Birgunj</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-red-500 text-white">Critical</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">2,150</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">240K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">2.8/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Border Crime, Smuggling</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">92%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 92%; background-color: rgb(220, 38, 38);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Surkhet - Medium -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 32%; top: 35%;" data-level="Medium">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(217, 119, 6); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 14px; height: 20px; 
-                                                            background: linear-gradient(45deg, rgb(217, 119, 6), rgba(217, 119, 6, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 15px rgba(217, 119, 6, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 20px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(217, 119, 6, 0.25), rgba(217, 119, 6, 0.5), rgba(217, 119, 6, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                🟡
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Surkhet</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-yellow-500 text-white">Medium</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">640</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">128K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">5.4/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Theft, Assault</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">48%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 48%; background-color: rgb(217, 119, 6);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Lahan - Medium -->
-                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
-                                         style="left: 85%; top: 50%;" data-level="Medium">
-                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
-                                             style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));">
-                                            
-                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-5 h-2 rounded-full animate-ping opacity-40"
-                                                 style="background-color: rgb(217, 119, 6); filter: blur(2px);"></div>
-                                            
-                                            <div class="relative building-main">
-                                                <div class="relative"
-                                                     style="width: 12px; height: 16px; 
-                                                            background: linear-gradient(45deg, rgb(217, 119, 6), rgba(217, 119, 6, 0.8));
-                                                            transform: rotateX(60deg) rotateY(45deg);
-                                                            transform-origin: bottom center;
-                                                            border-radius: 2px 2px 0 0;
-                                                            border: 1px solid rgba(255, 255, 255, 0.2);
-                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                                                                        0 0 12px rgba(217, 119, 6, 0.6);">
-                                                    
-                                                    <div class="window-grid absolute inset-1">
-                                                        <div class="window"></div>
-                                                        <div class="window"></div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
-                                                     style="width: 16px; height: 3px; 
-                                                            background: linear-gradient(to right, rgba(217, 119, 6, 0.25), rgba(217, 119, 6, 0.5), rgba(217, 119, 6, 0.25));
-                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
-                                            </div>
-                                            
-                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
-                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
-                                                🟡
-                                            </div>
-                                        </div>
-
-                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
-                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
-                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                                                                   0 0 30px rgba(59, 130, 246, 0.3),
-                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                                                        backdrop-filter: blur(16px);">
-                                                
-                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
-                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
-                                                </div>
-                                                
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Lahan</h3>
-                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-yellow-500 text-white">Medium</div>
-                                                </div>
-                                                
-                                                <div class="grid grid-cols-2 gap-3 text-sm">
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>📊</span>
-                                                            <span class="font-medium text-muted-foreground">Cases</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">680</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>👥</span>
-                                                            <span class="font-medium text-muted-foreground">Population</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">56K</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🛡️</span>
-                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground">5.9/10</p>
-                                                    </div>
-                                                    <div class="bg-secondary/30 p-2 rounded-lg">
-                                                        <div class="flex items-center gap-1 mb-1">
-                                                            <span>🚨</span>
-                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
-                                                        </div>
-                                                        <p class="font-bold text-foreground text-xs">Theft, Fraud</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
-                                                        <span class="text-xs font-bold text-foreground">42%</span>
-                                                    </div>
-                                                    <div class="w-full bg-secondary rounded-full h-2">
-                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 42%; background-color: rgb(217, 119, 6);"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Legend -->
-                                <div class="absolute bottom-4 right-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3" 
-                                     style="box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
-                                    <h4 class="text-sm font-semibold text-foreground mb-2 flex items-center gap-1">🎯 Danger Levels</h4>
-                                    <div class="space-y-1 text-xs">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(220, 38, 38);"></div>
-                                            <span class="text-muted-foreground">⚠️ Critical</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(234, 88, 12);"></div>
-                                            <span class="text-muted-foreground">🔴 High</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(217, 119, 6);"></div>
-                                            <span class="text-muted-foreground">🟡 Medium</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(34, 197, 94);"></div>
-                                            <span class="text-muted-foreground">🟢 Low</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Statistics Panel -->
-                            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-secondary/30 p-4 rounded-lg border border-border/50 transition-all duration-300 hover:scale-105 hover:bg-secondary/50">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-lg">🚨</span>
-                                            <span class="text-sm font-medium text-muted-foreground">Most Dangerous City</span>
-                                        </div>
-                                        <span class="text-sm font-bold text-red-400">+12%</span>
-                                    </div>
-                                    <p class="text-xl font-bold text-foreground">Kathmandu</p>
-                                    <p class="text-xs text-muted-foreground">4,850 cases reported</p>
-                                </div>
-                                <div class="bg-secondary/30 p-4 rounded-lg border border-border/50 transition-all duration-300 hover:scale-105 hover:bg-secondary/50">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-lg">🛡️</span>
-                                            <span class="text-sm font-medium text-muted-foreground">Safest Major City</span>
-                                        </div>
-                                        <span class="text-sm font-bold" style="color: rgb(34, 197, 94);">-3%</span>
-                                    </div>
-                                    <p class="text-xl font-bold text-foreground">Pokhara</p>
-                                    <p class="text-xs text-muted-foreground">890 cases reported</p>
-                                </div>
-                                <div class="bg-secondary/30 p-4 rounded-lg border border-border/50 transition-all duration-300 hover:scale-105 hover:bg-secondary/50">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-lg">📍</span>
-                                            <span class="text-sm font-medium text-muted-foreground">Crime Hotspots</span>
-                                        </div>
-                                        <span class="text-sm font-bold" style="color: rgb(234, 179, 8);">+2</span>
-                                    </div>
-                                    <p class="text-xl font-bold text-foreground">8 Active</p>
-                                    <p class="text-xs text-muted-foreground">Require immediate attention</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+    <!-- Tooltip (positioned fixed so it can appear outside the container) -->
+    <div class="tooltip-3d" id="tooltip">
+        <h3 id="tooltipTitle"></h3>
+        <div class="stats">
+            <div class="stat">
+                <div class="label">📊 Cases</div>
+                <div class="value" id="tooltipCases"></div>
+            </div>
+            <div class="stat">
+                <div class="label">👥 Population</div>
+                <div class="value" id="tooltipPopulation"></div>
+            </div>
+            <div class="stat">
+                <div class="label">🛡️ Safety</div>
+                <div class="value" id="tooltipSafety"></div>
+            </div>
+            <div class="stat">
+                <div class="label">📈 Risk</div>
+                <div class="value" id="tooltipRisk"></div>
+            </div>
+        </div>
+        <div class="description">
+            <div class="label">🚨 Primary Crime Types</div>
+            <div class="value" id="tooltipCrimes"></div>
+        </div>
+        <div class="risk-assessment">
+            <div class="label" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                <span>Risk Assessment</span>
+                <span id="tooltipRiskPercent"></span>
+            </div>
+            <div class="risk-bar">
+                <div class="risk-fill" id="tooltipRiskBar"></div>
             </div>
         </div>
     </div>
@@ -1661,27 +964,549 @@
             });
         }
 
+        // 3D Map functionality
+        function latLongToPosition(lat, long) {
+            // Nepal's geographic bounds
+            const minLong = 80.058;  // West (Nepalgunj)
+            const maxLong = 88.201;  // East (Biratnagar)
+            const minLat = 26.347;   // South (Birgunj)
+            const maxLat = 30.447;   // North (Himalayas)
+
+            // Normalize to 3D space (-1 to 1 range)
+            const x = (long - 84.0) / 2.0;  // 84°E = center (0), ±2.0 range
+            const z = -((lat - 28.0) / 2.0); // 28°N = center (0), inverted for 3D
+            
+            return {
+                x: x * 1.5,  // Scale horizontally for better spread
+                y: 0.15,     // Slight elevation
+                z: z * 1.2   // Scale vertically
+            };
+        }
+
+        const crimeLocations = [
+            // Kathmandu (27.7172°N, 85.3240°E)
+            {
+                id: 'kathmandu',
+                name: 'Kathmandu',
+                position: latLongToPosition(27.7172, 85.3240),
+                dangerLevel: 'critical',
+                cases: 4850,
+                population: '1.4M',
+                safetyIndex: '2.1/10',
+                riskPercent: 95,
+                crimes: 'Cyber Crime, Theft, Fraud',
+                description: 'Capital city with highest crime density'
+            },
+            // Pokhara (28.2096°N, 83.9856°E)
+            {
+                id: 'pokhara',
+                name: 'Pokhara',
+                position: latLongToPosition(28.2096, 83.9856),
+                dangerLevel: 'low',
+                cases: 890,
+                population: '518K',
+                safetyIndex: '6.8/10',
+                riskPercent: 25,
+                crimes: 'Theft, Minor Assault',
+                description: 'Tourist hub with relatively low crime'
+            },
+            // Birgunj (27.0006°N, 84.8775°E)
+            {
+                id: 'birgunj',
+                name: 'Heatuda',
+                position: latLongToPosition(27.0006, 84.8775),
+                dangerLevel: 'critical',
+                cases: 2150,
+                population: '240K',
+                safetyIndex: '2.8/10',
+                riskPercent: 92,
+                crimes: 'Border Crime, Smuggling, Trafficking',
+                description: 'Major border crossing with high crime'
+            },
+            // Biratnagar (26.4525°N, 87.2718°E)
+            {
+                id: 'biratnagar',
+                name: 'Biratnagar',
+                position: latLongToPosition(27.23, 88.50),
+                dangerLevel: 'high',
+                cases: 1680,
+                population: '242K',
+                safetyIndex: '3.9/10',
+                riskPercent: 75,
+                crimes: 'Border Crime, Theft, Drug Trafficking',
+                description: 'Eastern border city with significant crime'
+            },
+            // Nepalgunj (28.0500°N, 81.6167°E)
+            {
+                id: 'nepalgunj',
+                name: 'Rukum',
+                position: latLongToPosition(28.0500, 81.6167),
+                dangerLevel: 'low',
+                cases: 950,
+                population: '13K',
+                safetyIndex: '8/10',
+                riskPercent: 70,
+                crimes: 'Theft, Trafficking',
+                description: 'Western border with crime issues'
+            }
+        ];
+
+        // Three.js variables
+        let scene, camera, renderer, controls, loader;
+        let raycaster, mouse;
+        let nepalModel, markers = [];
+        let hoveredMarker = null;
+
+        // DOM elements
+        const sceneContainer = document.getElementById('sceneContainer');
+        const loading = document.getElementById('loading');
+        const tooltip = document.getElementById('tooltip');
+
+        // Initialize the 3D scene
+        function initScene() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f172a);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(55, sceneContainer.clientWidth / sceneContainer.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 6);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x0f172a);
+            
+            // Clear any existing canvas
+            const existingCanvas = sceneContainer.querySelector('canvas');
+            if (existingCanvas) {
+                sceneContainer.removeChild(existingCanvas);
+            }
+            
+            sceneContainer.insertBefore(renderer.domElement, sceneContainer.firstChild);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 12;
+            controls.minDistance = 3;
+            controls.maxPolarAngle = Math.PI / 2.2;
+
+            // Raycaster for mouse interactions
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // GLTF Loader
+            loader = new THREE.GLTFLoader();
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(8, 12, 6);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0x4f46e5, 0.4, 50);
+            pointLight.position.set(-8, 8, -8);
+            scene.add(pointLight);
+
+            const spotLight = new THREE.SpotLight(0xf1f5f9, 0.5, 0, 0.6, 0.3);
+            spotLight.position.set(0, 10, 0);
+            scene.add(spotLight);
+
+            // Ground plane
+            const groundGeometry = new THREE.PlaneGeometry(12, 12);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x0f172a,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.15;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Load Nepal GLB model
+            loadNepalModel();
+            
+            // Create crime markers
+            createCrimeMarkers();
+
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('click', onMouseClick);
+
+            // Hide loading screen
+            loading.style.display = 'none';
+
+            // Start animation loop
+            animate();
+        }
+
+        function loadNepalModel() {
+            loader.load(
+                'https://cdn.builder.io/o/assets%2Ff94f139dc8e648d7ad4dea7ce579fa2f%2F1ff862cf119d421a94ffe93962ee20ab?alt=media&token=39f12243-db6d-4341-be24-c69b30bbc63a&apiKey=f94f139dc8e648d7ad4dea7ce579fa2f',
+                (gltf) => {
+                    nepalModel = gltf.scene;
+                    nepalModel.scale.set(4, 4, 4);
+                    nepalModel.position.set(0, -0.2, 0);
+                    
+                    // Configure materials
+                    nepalModel.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            if (child.material) {
+                                if (Array.isArray(child.material)) {
+                                    child.material.forEach((mat) => {
+                                        if (mat instanceof THREE.MeshStandardMaterial) {
+                                            mat.roughness = 0.7;
+                                            mat.metalness = 0.2;
+                                        }
+                                    });
+                                } else if (child.material instanceof THREE.MeshStandardMaterial) {
+                                    child.material.roughness = 0.7;
+                                    child.material.metalness = 0.2;
+                                }
+                            }
+                        }
+                    });
+                    
+                    scene.add(nepalModel);
+                },
+                (progress) => {
+                    console.log('Loading progress:', progress);
+                },
+                (error) => {
+                    console.error('Error loading GLB model:', error);
+                    // Create fallback terrain if GLB fails
+                    createFallbackTerrain();
+                }
+            );
+        }
+
+        function createFallbackTerrain() {
+            // Simple fallback Nepal shape
+            const shape = new THREE.Shape();
+            shape.moveTo(-2.2, -0.8);
+            shape.lineTo(-1.8, 0.3);
+            shape.lineTo(-1.2, 0.6);
+            shape.lineTo(-0.6, 0.7);
+            shape.lineTo(-0.2, 0.8);
+            shape.lineTo(0.3, 0.7);
+            shape.lineTo(0.8, 0.6);
+            shape.lineTo(1.4, 0.5);
+            shape.lineTo(1.9, 0.3);
+            shape.lineTo(2.2, 0.1);
+            shape.lineTo(2.1, -0.3);
+            shape.lineTo(1.8, -0.6);
+            shape.lineTo(1.3, -0.8);
+            shape.lineTo(0.7, -0.9);
+            shape.lineTo(0.1, -0.85);
+            shape.lineTo(-0.5, -0.8);
+            shape.lineTo(-1.2, -0.75);
+            shape.lineTo(-1.8, -0.7);
+            shape.lineTo(-2.2, -0.8);
+
+            const extrudeSettings = {
+                depth: 0.2,
+                bevelEnabled: true,
+                bevelThickness: 0.05,
+                bevelSize: 0.02,
+                bevelSegments: 5
+            };
+
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            const material = new THREE.MeshLambertMaterial({ 
+                color: 0x2d4a3d,
+                transparent: true,
+                opacity: 0.9
+            });
+
+            const fallbackMesh = new THREE.Mesh(geometry, material);
+            fallbackMesh.rotation.x = -Math.PI / 2;
+            fallbackMesh.position.y = -0.1;
+            fallbackMesh.castShadow = true;
+            fallbackMesh.receiveShadow = true;
+            scene.add(fallbackMesh);
+        }
+
+        function createCrimeMarkers() {
+            markers = [];
+            
+            crimeLocations.forEach(location => {
+                const markerGroup = new THREE.Group();
+                markerGroup.userData = { location };
+
+                // Get marker color based on danger level
+                const color = getDangerColor(location.dangerLevel);
+                const height = getDangerHeight(location.dangerLevel);
+
+                // Create small dot marker (no labels initially)
+                const markerGeometry = new THREE.SphereGeometry(0.06, 12, 8);
+                const markerMaterial = new THREE.MeshStandardMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.4,
+                    metalness: 0.1,
+                    roughness: 0.7
+                });
+
+                const markerMesh = new THREE.Mesh(markerGeometry, markerMaterial);
+                markerMesh.position.copy(location.position);
+                markerMesh.castShadow = true;
+
+                // Add subtle pulsing light
+                const light = new THREE.PointLight(color, 0.8, 1.5);
+                light.position.copy(markerMesh.position);
+                light.position.y += 0.1;
+
+                // Add very subtle glow effect
+                const glowGeometry = new THREE.SphereGeometry(0.08, 8, 6);
+                const glowMaterial = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+                glowMesh.position.copy(markerMesh.position);
+
+                markerGroup.add(markerMesh);
+                markerGroup.add(light);
+                markerGroup.add(glowMesh);
+
+                scene.add(markerGroup);
+                markers.push(markerGroup);
+            });
+        }
+
+        function getDangerColor(level) {
+            switch (level) {
+                case 'critical': return 0xdc2626;
+                case 'high': return 0xef4444;
+                case 'medium': return 0xeab308;
+                case 'low': return 0x22c55e;
+                default: return 0x6b7280;
+            }
+        }
+
+        function getDangerHeight(level) {
+            switch (level) {
+                case 'critical': return 0.3;
+                case 'high': return 0.25;
+                case 'medium': return 0.2;
+                case 'low': return 0.15;
+                default: return 0.1;
+            }
+        }
+
+        function onMouseMove(event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(markers, true);
+
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object.parent;
+                if (hoveredMarker !== intersected) {
+                    if (hoveredMarker) {
+                        resetMarkerScale(hoveredMarker);
+                    }
+                    hoveredMarker = intersected;
+                    highlightMarker(hoveredMarker);
+                    showTooltip(event, hoveredMarker.userData.location);
+                }
+                updateTooltipPosition(event);
+            } else {
+                if (hoveredMarker) {
+                    resetMarkerScale(hoveredMarker);
+                    hoveredMarker = null;
+                }
+                hideTooltip();
+            }
+        }
+
+        function onMouseClick(event) {
+            if (hoveredMarker) {
+                const location = hoveredMarker.userData.location;
+                console.log(`Clicked on ${location.name}: ${location.cases} cases`);
+            }
+        }
+
+        function highlightMarker(marker) {
+            marker.children.forEach(child => {
+                if (child.isMesh) {
+                    child.scale.setScalar(1.5);
+                }
+                if (child.isPointLight) {
+                    child.intensity = 1.5;
+                }
+            });
+        }
+
+        function resetMarkerScale(marker) {
+            marker.children.forEach(child => {
+                if (child.isMesh) {
+                    child.scale.setScalar(1);
+                }
+                if (child.isPointLight) {
+                    child.intensity = 0.8;
+                }
+            });
+        }
+
+        function showTooltip(event, location) {
+            const tooltipTitle = document.getElementById('tooltipTitle');
+            const tooltipCases = document.getElementById('tooltipCases');
+            const tooltipPopulation = document.getElementById('tooltipPopulation');
+            const tooltipSafety = document.getElementById('tooltipSafety');
+            const tooltipRisk = document.getElementById('tooltipRisk');
+            const tooltipCrimes = document.getElementById('tooltipCrimes');
+            const tooltipRiskPercent = document.getElementById('tooltipRiskPercent');
+            const tooltipRiskBar = document.getElementById('tooltipRiskBar');
+
+            tooltipTitle.innerHTML = `📍 ${location.name} <span class="danger-badge" style="background: ${getDangerColorHex(location.dangerLevel)};">${location.dangerLevel}</span>`;
+            tooltipCases.textContent = location.cases.toLocaleString();
+            tooltipPopulation.textContent = location.population;
+            tooltipSafety.textContent = location.safetyIndex;
+            tooltipRisk.textContent = `${location.riskPercent}%`;
+            tooltipCrimes.textContent = location.crimes;
+            tooltipRiskPercent.textContent = `${location.riskPercent}%`;
+
+            tooltipRiskBar.style.width = `${location.riskPercent}%`;
+            tooltipRiskBar.style.background = getDangerColorHex(location.dangerLevel);
+
+            tooltip.classList.add('show');
+            updateTooltipPosition(event);
+        }
+
+        function hideTooltip() {
+            tooltip.classList.remove('show');
+        }
+
+        function updateTooltipPosition(event) {
+            const x = event.clientX;
+            const y = event.clientY;
+
+            let tooltipX = x + 15;
+            let tooltipY = y - 10;
+
+            if (tooltipX + 320 > window.innerWidth) {
+                tooltipX = x - 335;
+            }
+            if (tooltipY < 0) {
+                tooltipY = y + 15;
+            }
+
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.top = `${tooltipY}px`;
+        }
+
+        function getDangerColorHex(level) {
+            switch (level) {
+                case 'critical': return '#dc2626';
+                case 'high': return '#ef4444';
+                case 'medium': return '#eab308';
+                case 'low': return '#22c55e';
+                default: return '#6b7280';
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = sceneContainer.clientWidth / sceneContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+        }
+ let swayAngle = 0;
+    let swayDirection = 1;
+    const maxSwayAngle = 8; // Reduced from 15 to make movement more subtle
+    const swaySpeed = 0.02; // Slower speed
+    let isSwaying = true;
+    let swayPauseTimer = 0;
+    const swayDuration = 3000; // 3 seconds of swaying
+    const pauseDuration = 5000; // 5 seconds pause
+
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        // Smooth swaying animation with pauses
+        const now = Date.now();
+        
+        if (isSwaying) {
+            swayAngle += swaySpeed * swayDirection;
+            
+            // Reverse direction at limits
+            if (Math.abs(swayAngle) >= maxSwayAngle) {
+                swayDirection *= -1;
+            }
+            
+            // Check if we should pause
+            if (now - swayPauseTimer > swayDuration) {
+                isSwaying = false;
+                swayPauseTimer = now;
+            }
+        } else {
+            // Check if we should resume swaying
+            if (now - swayPauseTimer > pauseDuration) {
+                isSwaying = true;
+                swayPauseTimer = now;
+            }
+        }
+        
+        // Apply rotation to Nepal model if it exists
+        if (nepalModel) {
+            // Smooth the transition when starting/switching directions
+            const targetAngle = isSwaying ? swayAngle : 0;
+            nepalModel.rotation.y = THREE.MathUtils.lerp(
+                nepalModel.rotation.y, 
+                THREE.MathUtils.degToRad(targetAngle), 
+                0.05
+            );
+        }
+        
+        // Update controls (but disable auto-rotate)
+        if (controls) {
+            controls.autoRotate = false;
+            controls.update();
+        }
+        
+        // Rest of your animation code...
+        renderer.render(scene, camera);
+    }
+      
+
         // Filter functionality
         document.getElementById('dangerFilter').addEventListener('change', function(e) {
             const filterValue = e.target.value;
-            const cityMarkers = document.querySelectorAll('[data-level]');
             
-            cityMarkers.forEach(marker => {
-                const level = marker.getAttribute('data-level');
+            markers.forEach(marker => {
+                const level = marker.userData.location.dangerLevel;
                 
-                if (filterValue === 'All' || filterValue === level) {
-                    marker.style.display = 'block';
+                if (filterValue === 'All' || 
+                    (filterValue === 'Critical' && level === 'critical') ||
+                    (filterValue === 'High' && level === 'high') ||
+                    (filterValue === 'Medium' && level === 'medium') ||
+                    (filterValue === 'Low' && level === 'low')) {
+                    marker.visible = true;
                 } else {
-                    marker.style.display = 'none';
+                    marker.visible = false;
                 }
             });
         });
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                initializeCharts();
-            }, 1000);
+            initializeCharts();
+            initScene();
         });
     </script>
 </body>
