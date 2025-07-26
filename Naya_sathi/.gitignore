@@ -1,3 +1,48 @@
+# Ignore PyCharm project settings
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+*.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VSCode settings (optional if you're using VSCode too)
+.vscode/
+
+# Mac system files (if using macOS)
+.DS_Store
+
+# Python egg and cache
+*.egg-info/
+*.egg
+.eggs/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Test output
+htmlcov/
+coverage.xml
+*.cover
+
+# Distribution / packaging
+build/
+dist/
+*.whl
+
+# SQLite databases or sensitive local DBs
+*.dbsqlite3
+
 # Byte-compiled / optimized / DLL files
 _pycache_/
 *.py[cod]
