@@ -3,146 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legal Assistant Chatbot</title>
+    <title>Legal Assistant | Nyaya Sathi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #10a37f;
+            --primary-dark: #0d8a6a;
+            --bg-color: #343541;
+            --message-bg-user: #444654;
+            --message-bg-bot: #40414f;
+            --text-color: #ececf1;
+            --text-secondary: #acacbe;
+            --input-bg: #40414f;
+            --border-radius: 8px;
+        }
+        
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #5e5e6a;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .header h1 i {
+            color: var(--primary-color);
         }
         
         .chat-container {
-            width: 400px;
-            height: 600px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .chat-header {
-            background-color: #4285f4;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .chat-messages {
             flex: 1;
-            padding: 15px;
             overflow-y: auto;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 1rem;
         }
         
         .message {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 18px;
-            word-wrap: break-word;
-        }
-        
-        .user-message {
-            align-self: flex-end;
-            background-color: #4285f4;
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
-        
-        .bot-message {
-            align-self: flex-start;
-            background-color: #f1f1f1;
-            color: #333;
-            border-bottom-left-radius: 5px;
-        }
-        
-        .bot-message p {
-            margin: 5px 0;
-            line-height: 1.4;
-        }
-        
-        .bot-message ul {
-            margin: 5px 0;
-            padding-left: 20px;
-        }
-        
-        .bot-message li {
-            margin-bottom: 5px;
-        }
-        
-        .chat-input {
             display: flex;
-            padding: 10px;
-            border-top: 1px solid #eee;
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            line-height: 1.5;
+        }
+        
+        .message-user {
+            background-color: var(--message-bg-user);
+        }
+        
+        .message-bot {
+            background-color: var(--message-bg-bot);
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .avatar-user {
+            background-color: #19c37d;
+        }
+        
+        .avatar-bot {
+            background-color: #5436da;
+        }
+        
+        .avatar i {
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .message-content {
+            flex: 1;
+            padding-top: 0.25rem;
+        }
+        
+        .message-content p {
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+        
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .message-content ul,
+        .message-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+        
+        .message-content li {
+            margin-bottom: 0.5rem;
+            white-space: pre-wrap;
+        }
+        
+        .input-container {
+            padding: 1rem;
+            background-color: var(--bg-color);
+            position: sticky;
+            bottom: 0;
+            border-top: 1px solid #5e5e6a;
+        }
+        
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
         }
         
         #user-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
+            width: 100%;
+            padding: 1rem 3.5rem 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
             outline: none;
-            font-size: 14px;
+            resize: none;
+            min-height: 60px;
+            max-height: 200px;
+            line-height: 1.5;
         }
         
         #send-button {
-            background-color: #4285f4;
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            margin-left: 10px;
-            cursor: pointer;
+            width: 36px;
+            height: 36px;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
         
         #send-button:hover {
-            background-color: #3367d6;
+            background-color: var(--primary-dark);
+        }
+        
+        #send-button i {
+            font-size: 1rem;
         }
         
         .typing-indicator {
             display: none;
-            align-self: flex-start;
-            background-color: #f1f1f1;
-            color: #333;
-            padding: 10px 15px;
-            border-radius: 18px;
-            border-bottom-left-radius: 5px;
-            margin-bottom: 10px;
+            gap: 0.5rem;
+            padding: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
         }
         
-        .typing-indicator span {
+        .typing-indicator .avatar {
+            background-color: #5436da;
+        }
+        
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding-top: 0.25rem;
+        }
+        
+        .typing-dots span {
             display: inline-block;
             width: 8px;
             height: 8px;
-            background-color: #666;
+            background-color: var(--text-secondary);
             border-radius: 50%;
-            margin: 0 2px;
             animation: bounce 1.4s infinite ease-in-out;
         }
         
-        .typing-indicator span:nth-child(2) {
+        .typing-dots span:nth-child(2) {
             animation-delay: 0.2s;
         }
         
-        .typing-indicator span:nth-child(3) {
+        .typing-dots span:nth-child(3) {
             animation-delay: 0.4s;
         }
         
@@ -154,30 +230,161 @@
                 transform: translateY(-5px);
             }
         }
+        
+        /* Popup styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .popup-content {
+            background-color: var(--bg-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .popup-content h2 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .popup-content select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: none;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .popup-content button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .popup-content button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        @media (max-width: 768px) {
+            .message {
+                padding: 1rem 0.75rem;
+                gap: 0.75rem;
+            }
+            
+            .avatar {
+                width: 30px;
+                height: 30px;
+            }
+            
+            #user-input {
+                padding: 0.75rem 3rem 0.75rem 1rem;
+                min-height: 50px;
+            }
+            
+            #send-button {
+                width: 32px;
+                height: 32px;
+                right: 0.75rem;
+                bottom: 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            Legal Assistant
+    <!-- Popup Overlay -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-content">
+            <h2><i class="fas fa-balance-scale"></i> Welcome to Nyaya Sathi</h2>
+            <p>In which subject of matter are you facing the problem?</p>
+            <select id="legal-matter">
+                <option value="" disabled selected>Select a legal matter</option>
+                <option value="fraud & forgery">Fraud & Forgery</option>
+                <option value="corruption">Corruption</option>
+                <option value="murder">Murder</option>
+                <option value="harassment">Harassment</option>
+                <option value="rape">Rape</option>
+                <option value="cyber crime">Cyber Crime</option>
+                <option value="other">Other</option>
+            </select>
+            <button id="submit-matter">Continue</button>
         </div>
-        <div class="chat-messages" id="chat-messages">
-            <div class="message bot-message">
+    </div>
+    
+    <header class="header">
+        <h1><i class="fas fa-balance-scale"></i> Nyaya Sathi</h1>
+    </header>
+    
+    <main class="chat-container" id="chat-messages">
+        {% if not chat_history %}
+        <div class="message message-bot">
+            <div class="avatar avatar-bot">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
                 <p>Hello! I'm your legal assistant. Ask me anything about Nepalese law.</p>
+                <p>I can help with:</p>
+                <ul>
+                    <li>Legal procedures</li>
+                    <li>Document requirements</li>
+                    <li>Rights and responsibilities</li>
+                    <li>And other legal queries</li>
+                </ul>
             </div>
-            <div class="typing-indicator" id="typing-indicator">
+        </div>
+        {% endif %}
+        
+        {% for chat in chat_history %}
+        <div class="message {% if chat.is_user_message %}message-user{% else %}message-bot{% endif %}">
+            <div class="avatar {% if chat.is_user_message %}avatar-user{% else %}avatar-bot{% endif %}">
+                <i class="fas {% if chat.is_user_message %}fa-user{% else %}fa-robot{% endif %}"></i>
+            </div>
+            <div class="message-content">
+                {% if chat.is_user_message %}
+                    {{ chat.message|linebreaksbr }}
+                {% else %}
+                    {{ chat.response|linebreaks }}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="typing-dots">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
         </div>
-        <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Ask a legal question..." autocomplete="off">
+    </main>
+    
+    <div class="input-container">
+        <div class="input-wrapper">
+            <textarea id="user-input" placeholder="Ask a legal question..." autocomplete="off" rows="1"></textarea>
             <button id="send-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
+                <i class="fas fa-paper-plane"></i>
             </button>
         </div>
     </div>
@@ -188,36 +395,98 @@
             const userInput = document.getElementById('user-input');
             const sendButton = document.getElementById('send-button');
             const typingIndicator = document.getElementById('typing-indicator');
+            const popupOverlay = document.getElementById('popup-overlay');
+            const legalMatterSelect = document.getElementById('legal-matter');
+            const submitMatterButton = document.getElementById('submit-matter');
             
-            // Function to add a message to the chat
+            // Show popup on page load
+            popupOverlay.style.display = 'flex';
+            
+            // Handle legal matter selection
+            submitMatterButton.addEventListener('click', function() {
+                const selectedMatter = legalMatterSelect.value;
+                if (selectedMatter) {
+                    popupOverlay.style.display = 'none';
+                    addMessage(`I need help with: ${selectedMatter}`, true);
+                    
+                    // Show typing indicator
+                    typingIndicator.style.display = 'flex';
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Simulate bot response after a delay
+                    setTimeout(() => {
+                        typingIndicator.style.display = 'none';
+                        let response = '';
+                        
+                        switch(selectedMatter) {
+                            case 'fraud & forgery':
+                                response = "I understand you're dealing with fraud or forgery issues. In Nepal, these are serious offenses under the Muluki Criminal Code. Can you please provide more details about your situation?";
+                                break;
+                            case 'corruption':
+                                response = "Corruption cases are handled seriously in Nepal. The Commission for the Investigation of Abuse of Authority (CIAA) investigates such cases. What specific information do you need?";
+                                break;
+                            case 'murder':
+                                response = "Murder cases are grave offenses. In Nepal, the punishment can range from life imprisonment to death penalty depending on circumstances. Please share more details about your case.";
+                                break;
+                            case 'harassment':
+                                response = "Harassment, including sexual harassment, is punishable under Nepalese law. The severity depends on the nature of the harassment. Could you elaborate on your situation?";
+                                break;
+                            case 'rape':
+                                response = "Rape is a heinous crime with strict punishments in Nepal. The law provides strong protections for victims. Would you like information about legal procedures or victim support services?";
+                                break;
+                            case 'cyber crime':
+                                response = "Cyber crimes are covered under the Electronic Transactions Act in Nepal. These can include hacking, online fraud, or cyber bullying. What specific issue are you facing?";
+                                break;
+                            default:
+                                response = "I understand you need legal assistance. Please describe your situation in more detail so I can provide the most relevant information.";
+                        }
+                        
+                        addMessage(response, false);
+                    }, 1500);
+                }
+            });
+            
+            // Auto-resize textarea
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
             function addMessage(text, isUser) {
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add('message');
-                messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+                messageDiv.classList.add(isUser ? 'message-user' : 'message-bot');
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.classList.add('avatar');
+                avatarDiv.classList.add(isUser ? 'avatar-user' : 'avatar-bot');
+                
+                const avatarIcon = document.createElement('i');
+                avatarIcon.classList.add('fas', isUser ? 'fa-user' : 'fa-robot');
+                avatarDiv.appendChild(avatarIcon);
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('message-content');
                 
                 if (!isUser) {
-                    // Format bot response with paragraphs and lists
-                    const formattedText = formatResponse(text);
-                    messageDiv.innerHTML = formattedText;
+                    contentDiv.innerHTML = formatResponse(text);
                 } else {
-                    messageDiv.textContent = text;
+                    contentDiv.textContent = text;
                 }
+                
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(contentDiv);
                 
                 chatMessages.insertBefore(messageDiv, typingIndicator);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             
-            // Function to format the response with paragraphs and lists
             function formatResponse(text) {
-                // Split into paragraphs (double newlines)
                 const paragraphs = text.split('\n\n');
-                
                 let html = '';
                 
                 paragraphs.forEach(para => {
-                    // Check if paragraph looks like a list
                     if (para.includes('\n- ') || para.includes('\n* ') || para.includes('\n• ')) {
-                        // Convert to unordered list
                         const listItems = para.split('\n')
                             .filter(item => item.trim().startsWith('- ') || 
                                           item.trim().startsWith('* ') || 
@@ -230,8 +499,7 @@
                         } else {
                             html += `<p>${para}</p>`;
                         }
-                    } else {
-                        // Regular paragraph
+                    } else if (para.trim() !== '') {
                         html += `<p>${para}</p>`;
                     }
                 });
@@ -239,17 +507,15 @@
                 return html;
             }
             
-            // Function to simulate typing effect
             async function typeMessage(message, element) {
                 const formattedMessage = formatResponse(message);
                 element.innerHTML = '';
                 
-                // Create a temporary container
                 const tempDiv = document.createElement('div');
                 element.appendChild(tempDiv);
                 
                 let i = 0;
-                const speed = 20; // typing speed in milliseconds
+                const speed = 20;
                 
                 while (i < formattedMessage.length) {
                     tempDiv.innerHTML = formattedMessage.substring(0, i);
@@ -258,11 +524,9 @@
                     i++;
                 }
                 
-                // Final render to ensure all formatting is correct
                 element.innerHTML = formattedMessage;
             }
             
-            // Function to send message to backend
             async function sendMessageToBackend(message) {
                 try {
                     const response = await fetch('chat/', {
@@ -274,63 +538,53 @@
                         body: JSON.stringify({ query: message })
                     });
                     
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    
-                    const data = await response.json();
-                    return data.response;
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return await response.json();
                 } catch (error) {
                     console.error('Error:', error);
-                    return "Sorry, I encountered an error processing your request.";
+                    return {response: "Sorry, I encountered an error processing your request."};
                 }
             }
             
-            // Function to get CSRF token
             function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [cookieName, cookieValue] = cookie.trim().split('=');
+                    if (cookieName === name) return decodeURIComponent(cookieValue);
                 }
-                return cookieValue;
+                return null;
             }
             
-            // Function to handle user input
             async function handleUserInput() {
                 const message = userInput.value.trim();
                 if (message === '') return;
                 
-                // Add user message to chat
                 addMessage(message, true);
                 userInput.value = '';
+                userInput.style.height = 'auto';
                 
-                // Show typing indicator
                 typingIndicator.style.display = 'flex';
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
                 try {
-                    // Send message to backend
-                    const responseText = await sendMessageToBackend(message);
-                    
-                    // Hide typing indicator
+                    const {response} = await sendMessageToBackend(message);
                     typingIndicator.style.display = 'none';
                     
-                    // Create bot message element
                     const botMessageDiv = document.createElement('div');
-                    botMessageDiv.classList.add('message');
-                    botMessageDiv.classList.add('bot-message');
+                    botMessageDiv.classList.add('message', 'message-bot');
+                    
+                    const botAvatar = document.createElement('div');
+                    botAvatar.classList.add('avatar', 'avatar-bot');
+                    botAvatar.innerHTML = '<i class="fas fa-robot"></i>';
+                    
+                    const botContent = document.createElement('div');
+                    botContent.classList.add('message-content');
+                    
+                    botMessageDiv.appendChild(botAvatar);
+                    botMessageDiv.appendChild(botContent);
                     chatMessages.insertBefore(botMessageDiv, typingIndicator);
                     
-                    // Type out the response with typing effect
-                    await typeMessage(responseText, botMessageDiv);
-                    
+                    await typeMessage(response, botContent);
                 } catch (error) {
                     typingIndicator.style.display = 'none';
                     addMessage("Sorry, I encountered an error processing your request.", false);
@@ -338,17 +592,22 @@
                 }
             }
             
-            // Event listeners
             sendButton.addEventListener('click', handleUserInput);
-            
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
                     handleUserInput();
                 }
             });
             
-            // Focus input field on load
-            userInput.focus();
+            // Focus input after popup is closed
+            submitMatterButton.addEventListener('click', function() {
+                setTimeout(() => {
+                    userInput.focus();
+                }, 100);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         });
     </script>
 </body>
