@@ -25,7 +25,7 @@ urlpatterns = [
     path('FIR/', include('FIR.urls')),
     path('', include('home_page.urls')),
     path('consult/',include('consultion_lawyer.urls')),
-     path('crime/', include('crime_reports.urls')),
+    path('crime/', include('crime_reports.urls')),
 ]
 
 if settings.DEBUG:
