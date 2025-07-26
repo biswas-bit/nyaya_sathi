@@ -302,6 +302,14 @@
             padding: 1rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             border-left: 4px solid var(--primary-color);
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .lawyer-recommendation.visible {
+            opacity: 1;
+            transform: translateX(0);
         }
         
         .lawyer-card {
@@ -311,10 +319,20 @@
             padding: 1rem;
             font-size: 0.9rem;
             transition: transform 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .lawyer-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .lawyer-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .lawyer-card strong {
@@ -348,10 +366,12 @@
             font-size: 0.8rem;
             background-color: var(--primary-color);
             color: white;
+            transition: all 0.3s ease;
         }
         
         .lawyer-contact button:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-2px);
         }
         
         .urgent-tag {
@@ -660,7 +680,7 @@
                 }
             });
             
-            // Show recommended lawyers (max 3) after 5 seconds
+            // Show recommended lawyers (max 3) with sequential animation
             function showLawyers(caseType) {
                 const caseLawyers = lawyers[caseType];
                 if (caseLawyers && caseLawyers.length > 0) {
@@ -669,31 +689,40 @@
                     // Limit to max 3 lawyers
                     const lawyersToShow = caseLawyers.slice(0, 3);
                     
-                    lawyersToShow.forEach(lawyer => {
-                        const lawyerCard = document.createElement('div');
-                        lawyerCard.className = 'lawyer-card';
-                        lawyerCard.innerHTML = `
-                            <strong>${lawyer.name}</strong>
-                            <p>${lawyer.specialization}</p>
-                            <small>${lawyer.location}, ${lawyer.experience} experience</small>
-                            <div class="lawyer-rating">
-                                ${'<i class="fas fa-star"></i>'.repeat(Math.floor(lawyer.rating))}
-                                ${lawyer.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
-                                ${lawyer.rating} (${Math.floor(lawyer.rating * 10)} reviews)
-                            </div>
-                            <div class="lawyer-contact">
-                                <button onclick="alert('Connecting to ${lawyer.name} at ${lawyer.phone}')">
-                                    <i class="fas fa-phone"></i> Contact
-                                </button>
-                            </div>
-                        `;
-                        recommendedLawyers.appendChild(lawyerCard);
-                    });
-                    
-                    // Show after 5 seconds
+                    // First show the recommendation container
+                    lawyerRecommendation.style.display = 'flex';
                     setTimeout(() => {
-                        lawyerRecommendation.style.display = 'flex';
-                    }, 5000);
+                        lawyerRecommendation.classList.add('visible');
+                    }, 50);
+                    
+                    // Then add each lawyer card with a delay
+                    lawyersToShow.forEach((lawyer, index) => {
+                        setTimeout(() => {
+                            const lawyerCard = document.createElement('div');
+                            lawyerCard.className = 'lawyer-card';
+                            lawyerCard.innerHTML = `
+                                <strong>${lawyer.name}</strong>
+                                <p>${lawyer.specialization}</p>
+                                <small>${lawyer.location}, ${lawyer.experience} experience</small>
+                                <div class="lawyer-rating">
+                                    ${'<i class="fas fa-star"></i>'.repeat(Math.floor(lawyer.rating))}
+                                    ${lawyer.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                    ${lawyer.rating} (${Math.floor(lawyer.rating * 10)} reviews)
+                                </div>
+                                <div class="lawyer-contact">
+                                    <button onclick="alert('Connecting to ${lawyer.name} at ${lawyer.phone}')">
+                                        <i class="fas fa-phone"></i> Contact
+                                    </button>
+                                </div>
+                            `;
+                            recommendedLawyers.appendChild(lawyerCard);
+                            
+                            // Trigger the animation
+                            setTimeout(() => {
+                                lawyerCard.classList.add('visible');
+                            }, 50);
+                        }, index * 300); // 300ms delay between each card
+                    });
                 }
             }
             
