@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'authentication',
     'home_page',
     'FIR',
+    'consultion_lawyer',
+    'crime_reports',
     'guide',
 ]
 

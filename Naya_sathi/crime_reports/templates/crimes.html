@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal Crime Analytics Dashboard - 3D City Objects</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --background: 220 13% 6%;
+            --foreground: 0 0% 95%;
+            --card: 220 13% 8%;
+            --card-foreground: 0 0% 95%;
+            --primary: 213 94% 50%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 220 13% 15%;
+            --secondary-foreground: 0 0% 90%;
+            --muted: 220 13% 12%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 45 100% 50%;
+            --destructive: 0 84.2% 60.2%;
+            --border: 220 13% 18%;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-color: hsl(var(--border));
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.6;
+        }
+
+        .dark { color-scheme: dark; }
+        .min-h-screen { min-height: 100vh; }
+        .bg-background { background-color: hsl(var(--background)); }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .overflow-hidden { overflow: hidden; }
+        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+        .from-primary\/20 { --tw-gradient-from: hsl(var(--primary) / 0.2); --tw-gradient-to: hsl(var(--primary) / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+        .via-background { --tw-gradient-to: hsl(var(--background) / 0); --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--background)), var(--tw-gradient-to); }
+        .to-accent\/10 { --tw-gradient-to: hsl(var(--accent) / 0.1); }
+        .border-b { border-bottom-width: 1px; }
+        .border { border-width: 1px; }
+        .border-border { border-color: hsl(var(--border)); }
+        .container { width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+        .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-4 { padding: 1rem; }
+        .p-2 { padding: 0.5rem; }
+        .pt-0 { padding-top: 0px; }
+        .pb-4 { padding-bottom: 1rem; }
+        .pb-20 { padding-bottom: 5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .text-center { text-align: center; }
+        .max-w-4xl { max-width: 56rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        .text-foreground { color: hsl(var(--foreground)); }
+        .text-accent { color: hsl(var(--accent)); }
+        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+        .text-card-foreground { color: hsl(var(--card-foreground)); }
+        .text-red-400 { color: rgb(248 113 113); }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mt-12 { margin-top: 3rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .-mt-px { margin-top: -1px; }
+        .-top-2 { top: -0.5rem; }
+        .-right-2 { right: -0.5rem; }
+        .-left-2 { left: -0.5rem; }
+        .-bottom-1 { bottom: -0.25rem; }
+        .top-full { top: 100%; }
+        .bottom-full { bottom: 100%; }
+        .left-1\/2 { left: 50%; }
+        .block { display: block; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .inline-flex { display: inline-flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-4 { gap: 1rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-px { gap: 1px; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .space-y-12 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(3rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(3rem * var(--tw-space-y-reverse)); }
+        .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(0.375rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(0.375rem * var(--tw-space-y-reverse)); }
+        .bg-card\/50 { background-color: hsl(var(--card) / 0.5); }
+        .bg-card { background-color: hsl(var(--card)); }
+        .bg-secondary { background-color: hsl(var(--secondary)); }
+        .bg-secondary\/50 { background-color: hsl(var(--secondary) / 0.5); }
+        .bg-secondary\/30 { background-color: hsl(var(--secondary) / 0.3); }
+        .bg-secondary\/20 { background-color: hsl(var(--secondary) / 0.2); }
+        .bg-red-500\/10 { background-color: rgb(239 68 68 / 0.1); }
+        .bg-red-500 { background-color: rgb(239 68 68); }
+        .bg-orange-500 { background-color: rgb(249 115 22); }
+        .bg-yellow-500 { background-color: rgb(234 179 8); }
+        .bg-yellow-300 { background-color: rgb(253 224 71); }
+        .bg-white { background-color: white; }
+        .bg-black { background-color: black; }
+        .bg-opacity-80 { background-opacity: 0.8; }
+        .text-white { color: white; }
+        .backdrop-blur { backdrop-filter: blur(8px); }
+        .rounded-lg { border-radius: calc(var(--radius) + 2px); }
+        .rounded-xl { border-radius: calc(var(--radius) + 6px); }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-sm { border-radius: calc(var(--radius) - 4px); }
+        .rounded { border-radius: calc(var(--radius) - 2px); }
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+        .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .w-full { width: 100%; }
+        .w-8 { width: 2rem; }
+        .w-6 { width: 1.5rem; }
+        .w-5 { width: 1.25rem; }
+        .w-4 { width: 1rem; }
+        .w-3 { width: 0.75rem; }
+        .w-2 { width: 0.5rem; }
+        .h-96 { height: 24rem; }
+        .h-80 { height: 20rem; }
+        .h-8 { height: 2rem; }
+        .h-6 { height: 1.5rem; }
+        .h-5 { height: 1.25rem; }
+        .h-4 { height: 1rem; }
+        .h-3 { height: 0.75rem; }
+        .h-2 { height: 0.5rem; }
+        .min-w-64 { min-width: 16rem; }
+        .max-w-72 { max-width: 18rem; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .leading-relaxed { line-height: 1.625; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .cursor-pointer { cursor: pointer; }
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        .duration-300 { transition-duration: 300ms; }
+        .duration-500 { transition-duration: 500ms; }
+        .duration-1000 { transition-duration: 1000ms; }
+        .ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+        .-translate-x-1\/2 { --tw-translate-x: -50%; }
+        .-translate-y-1\/2 { --tw-translate-y: -50%; }
+        .-translate-y-px { --tw-translate-y: -1px; }
+        .group { }
+        .pointer-events-none { pointer-events: none; }
+        .z-50 { z-index: 50; }
+        .z-10 { z-index: 10; }
+        .inset-0 { top: 0px; right: 0px; bottom: 0px; left: 0px; }
+        .inset-1 { top: 0.25rem; right: 0.25rem; bottom: 0.25rem; left: 0.25rem; }
+        .opacity-0 { opacity: 0; }
+        .opacity-30 { opacity: 0.3; }
+        .opacity-40 { opacity: 0.4; }
+        .opacity-50 { opacity: 0.5; }
+        .opacity-60 { opacity: 0.6; }
+        .opacity-75 { opacity: 0.75; }
+        .opacity-80 { opacity: 0.8; }
+        .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .border-l-8 { border-left-width: 8px; }
+        .border-r-8 { border-right-width: 8px; }
+        .border-t-8 { border-top-width: 8px; }
+        .border-l-transparent { border-left-color: transparent; }
+        .border-r-transparent { border-right-color: transparent; }
+        .border-t-border { border-top-color: hsl(var(--border)); }
+        .border-t-card { border-top-color: hsl(var(--card)); }
+        .border-white { border-color: white; }
+        .border-opacity-30 { border-color: rgba(255, 255, 255, 0.3); }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .md\\:text-6xl { font-size: 3.75rem; line-height: 1; }
+            .md\\:text-5xl { font-size: 3rem; line-height: 1; }
+            .md\\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+            .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+
+        @media (min-width: 1280px) {
+            .xl\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        /* Custom animations */
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-700 { animation-delay: 0.7s; }
+
+        .group:hover .group-hover\\:opacity-100 { opacity: 1; }
+        .group:hover .group-hover\\:scale-110 { --tw-scale-x: 1.1; --tw-scale-y: 1.1; }
+        .group:hover .group-hover\\:-translate-y-1 { --tw-translate-y: -0.25rem; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ping {
+            75%, 100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 3D City specific styles */
+        .city-object {
+            transform-style: preserve-3d;
+            perspective: 300px;
+        }
+
+        .building-main {
+            transform-style: preserve-3d;
+        }
+
+        .building-side {
+            transform-style: preserve-3d;
+        }
+
+        /* Nepal map outline */
+        .nepal-outline {
+            position: absolute;
+            top: 8%;
+            left: 8%;
+            right: 8%;
+            bottom: 12%;
+            background: rgba(251, 191, 36, 0.1);
+            border: 2px solid rgba(251, 191, 36, 0.4);
+            border-radius: 25px 120px 40px 20px / 20px 40px 120px 25px;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.3));
+        }
+
+        /* Tooltip animations */
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            transform: translateX(-50%) translateY(-10px) scale(0.95);
+        }
+
+        .group:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px) scale(1);
+        }
+
+        /* Building window grid */
+        .window-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            padding: 1px;
+        }
+
+        .window {
+            background: rgb(253, 224, 71);
+            opacity: 0.6;
+            border-radius: 1px;
+            width: 2px;
+            height: 2px;
+            box-shadow: 0 0 2px rgba(255, 255, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="dark">
+        <div class="min-h-screen bg-background">
+            <!-- Hero Section -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/10 border-b border-border">
+                <div class="container mx-auto px-4 py-16">
+                    <div class="text-center max-w-4xl mx-auto">
+                        <h1 class="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-fade-in">
+                            Crime Analytics
+                            <span class="block text-accent text-3xl md:text-5xl mt-2">Nepal Dashboard</span>
+                        </h1>
+                        <p class="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed animate-fade-in delay-100">
+                            Visualizing crime trends and patterns across Nepal to promote awareness and safety
+                        </p>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-200">
+                                <div class="text-2xl mb-2">📈</div>
+                                <p class="text-2xl font-bold text-foreground">30,200</p>
+                                <p class="text-sm text-muted-foreground">Total Cases 2024</p>
+                            </div>
+                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-300">
+                                <div class="text-2xl mb-2">📊</div>
+                                <p class="text-2xl font-bold text-foreground">+7.4%</p>
+                                <p class="text-sm text-muted-foreground">YoY Change</p>
+                            </div>
+                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-500">
+                                <div class="text-2xl mb-2">📍</div>
+                                <p class="text-2xl font-bold text-foreground">11</p>
+                                <p class="text-sm text-muted-foreground">Monitored Cities</p>
+                            </div>
+                            <div class="bg-card/50 backdrop-blur border border-border rounded-lg p-4 animate-fade-in delay-700">
+                                <div class="text-2xl mb-2">⚠️</div>
+                                <p class="text-2xl font-bold text-foreground">3,235</p>
+                                <p class="text-sm text-muted-foreground">This Month</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="container mx-auto px-4 py-12 space-y-12">
+                <!-- Charts Section -->
+                <section>
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+                            📈 Crime Trends Analysis
+                        </h2>
+                        <p class="text-muted-foreground text-lg">Comprehensive breakdown of crime patterns and historical trends</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <!-- Bar Chart -->
+                        <div class="animate-fade-in delay-300">
+                            <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
+                                <div class="flex flex-col space-y-1.5 p-6 pb-4">
+                                    <h3 class="tracking-tight text-xl font-bold text-foreground">Crime Trends by Type - 2024</h3>
+                                    <p class="text-muted-foreground text-sm">Monthly breakdown of different crime types across Nepal</p>
+                                </div>
+                                <div class="p-6 pt-0">
+                                    <div class="h-96 w-full">
+                                        <canvas id="barChart" class="w-full h-full"></canvas>
+                                    </div>
+                                    
+                                    <!-- Legend -->
+                                    <div class="flex flex-wrap gap-4 mt-4 justify-center">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(59, 130, 246);"></div>
+                                            <span class="text-sm text-muted-foreground">Theft</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(239, 68, 68);"></div>
+                                            <span class="text-sm text-muted-foreground">Assault</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(245, 158, 11);"></div>
+                                            <span class="text-sm text-muted-foreground">Fraud</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(220, 38, 38);"></div>
+                                            <span class="text-sm text-muted-foreground">Homicide</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(124, 58, 237);"></div>
+                                            <span class="text-sm text-muted-foreground">Trafficking</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-sm" style="background-color: rgb(6, 182, 212);"></div>
+                                            <span class="text-sm text-muted-foreground">Cyber Crime</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Line Chart -->
+                        <div class="animate-fade-in delay-500">
+                            <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
+                                <div class="flex flex-col space-y-1.5 p-6 pb-4">
+                                    <div class="flex items-center justify-between flex-wrap gap-4">
+                                        <div>
+                                            <h3 class="tracking-tight text-xl font-bold text-foreground">Overall Crime Trends in Nepal</h3>
+                                            <p class="text-muted-foreground text-sm mt-1">Total crimes reported annually from 2019-2024</p>
+                                        </div>
+                                        <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-red-500/10 text-red-400">
+                                            📈
+                                            <span class="text-sm font-medium">+7.5%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-6 pt-0">
+                                    <div class="h-80 w-full">
+                                        <canvas id="lineChart" class="w-full h-full"></canvas>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-4 mt-6">
+                                        <div class="bg-secondary/50 p-4 rounded-lg border border-border">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-sm">⚠️</span>
+                                                <span class="text-sm text-muted-foreground">Peak Year</span>
+                                            </div>
+                                            <p class="text-lg font-semibold text-foreground">2024</p>
+                                            <p class="text-xs text-muted-foreground">30,200 cases</p>
+                                        </div>
+                                        <div class="bg-secondary/50 p-4 rounded-lg border border-border">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-sm">📈</span>
+                                                <span class="text-sm text-muted-foreground">Avg. Growth</span>
+                                            </div>
+                                            <p class="text-lg font-semibold text-foreground">5.2%</p>
+                                            <p class="text-xs text-muted-foreground">per year</p>
+                                        </div>
+                                        <div class="bg-secondary/50 p-4 rounded-lg border border-border">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-sm">🛡️</span>
+                                                <span class="text-sm text-muted-foreground">Most Common</span>
+                                            </div>
+                                            <p class="text-lg font-semibold text-foreground">Theft</p>
+                                            <p class="text-xs text-muted-foreground">37% of all crimes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3D Map Section -->
+                <section class="animate-fade-in delay-700">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+                            🗺️ Nepal Crime Danger Zones
+                        </h2>
+                        <p class="text-muted-foreground text-lg">Interactive 3D map showing dangerous areas and safety statistics across Nepal</p>
+                    </div>
+                    
+                    <div class="rounded-lg border text-card-foreground shadow-sm w-full bg-card border-border">
+                        <div class="flex flex-col space-y-1.5 p-6 pb-4">
+                            <div class="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                    <h3 class="tracking-tight text-xl font-bold text-foreground flex items-center gap-2">
+                                        🎯 Nepal Crime Danger Zones
+                                    </h3>
+                                    <p class="text-muted-foreground text-sm mt-1">Interactive 3D visualization of high-crime areas and safety statistics</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm">🔍</span>
+                                    <select id="dangerFilter" class="bg-secondary border border-border rounded px-3 py-1 text-sm text-foreground">
+                                        <option value="All">All Areas</option>
+                                        <option value="Critical">Critical Danger</option>
+                                        <option value="High">High Danger</option>
+                                        <option value="Medium">Medium Risk</option>
+                                        <option value="Low">Low Risk</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Map Container -->
+                        <div class="p-6 pt-0 pb-20">
+                            <div class="h-96 w-full rounded-lg border border-border relative" 
+                                 style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);">
+                                
+                                <!-- Nepal country outline -->
+                                <div class="nepal-outline"></div>
+                                
+                                <!-- Nepal Map with 3D Cities -->
+                                <div class="absolute inset-0">
+                                    <!-- Kathmandu - Critical -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 74%; top: 42%;" data-level="Critical">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6));">
+                                            
+                                            <!-- Pulsing Base Ring -->
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(220, 38, 38); filter: blur(2px);"></div>
+                                            
+                                            <!-- 3D Building Structure -->
+                                            <div class="relative building-main">
+                                                <!-- Main Building Tower -->
+                                                <div class="relative"
+                                                     style="width: 20px; height: 32px; 
+                                                            background: linear-gradient(45deg, rgb(220, 38, 38), rgba(220, 38, 38, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 20px rgba(220, 38, 38, 0.6);">
+                                                    
+                                                    <!-- Building Windows -->
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                    
+                                                    <!-- Building Top -->
+                                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
+                                                         style="width: 8px; height: 4px; 
+                                                                background: linear-gradient(to bottom, rgb(220, 38, 38), rgba(220, 38, 38, 0.7));
+                                                                border-radius: 1px; border: 1px solid rgba(255, 255, 255, 0.3);">
+                                                        
+                                                        <!-- Antenna/Signal Tower -->
+                                                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2"
+                                                             style="width: 1px; height: 6px; 
+                                                                    background: rgba(255, 255, 255, 0.8);
+                                                                    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);">
+                                                            
+                                                            <!-- Signal Rings -->
+                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 border border-white opacity-30 rounded-full animate-ping"></div>
+                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 border border-white opacity-50 rounded-full animate-ping" style="animation-delay: 0.5s;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Side Buildings -->
+                                                <div class="absolute -left-2 bottom-0 building-side"
+                                                     style="width: 8px; height: 16px; 
+                                                            background: linear-gradient(45deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.5));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 1px 1px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.15);
+                                                            opacity: 0.8;">
+                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
+                                                </div>
+                                                
+                                                <div class="absolute -right-2 bottom-0 building-side"
+                                                     style="width: 6px; height: 12px; 
+                                                            background: linear-gradient(45deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.5));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 1px 1px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.15);
+                                                            opacity: 0.8;">
+                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
+                                                </div>
+                                                
+                                                <!-- Base Platform -->
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 28px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(220, 38, 38, 0.25), rgba(220, 38, 38, 0.5), rgba(220, 38, 38, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <!-- Danger Level Badge -->
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                ⚠️
+                                            </div>
+                                        </div>
+
+                                        <!-- Enhanced Tooltip -->
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <!-- Tooltip Arrow -->
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <!-- Header -->
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Kathmandu</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-red-500 text-white">Critical</div>
+                                                </div>
+                                                
+                                                <!-- Stats Grid -->
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">4,850</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">1.4M</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">2.1/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Cyber Crime, Theft</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Risk Level Bar -->
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">95%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 95%; background-color: rgb(220, 38, 38);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pokhara - Medium -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 52%; top: 40%;" data-level="Medium">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(217, 119, 6); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 14px; height: 20px; 
+                                                            background: linear-gradient(45deg, rgb(217, 119, 6), rgba(217, 119, 6, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 15px rgba(217, 119, 6, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                    
+                                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
+                                                         style="width: 6px; height: 3px; 
+                                                                background: linear-gradient(to bottom, rgb(217, 119, 6), rgba(217, 119, 6, 0.7));
+                                                                border-radius: 1px; border: 1px solid rgba(255, 255, 255, 0.3);">
+                                                        
+                                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
+                                                             style="width: 1px; height: 4px; 
+                                                                    background: rgba(255, 255, 255, 0.8);
+                                                                    box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);">
+                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 border border-white opacity-30 rounded-full animate-ping"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 20px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(217, 119, 6, 0.25), rgba(217, 119, 6, 0.5), rgba(217, 119, 6, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                🟡
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Pokhara</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-yellow-500 text-white">Medium</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">890</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">518K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">6.8/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Theft, Assault</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">45%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 45%; background-color: rgb(217, 119, 6);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Biratnagar - High -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 95%; top: 45%;" data-level="High">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(234, 88, 12); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 16px; height: 24px; 
+                                                            background: linear-gradient(45deg, rgb(234, 88, 12), rgba(234, 88, 12, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 18px rgba(234, 88, 12, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                    
+                                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2"
+                                                         style="width: 7px; height: 3px; 
+                                                                background: linear-gradient(to bottom, rgb(234, 88, 12), rgba(234, 88, 12, 0.7));
+                                                                border-radius: 1px; border: 1px solid rgba(255, 255, 255, 0.3);">
+                                                        
+                                                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2"
+                                                             style="width: 1px; height: 5px; 
+                                                                    background: rgba(255, 255, 255, 0.8);
+                                                                    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);">
+                                                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 border border-white opacity-30 rounded-full animate-ping"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -left-2 bottom-0 building-side"
+                                                     style="width: 7px; height: 14px; 
+                                                            background: linear-gradient(45deg, rgba(234, 88, 12, 0.7), rgba(234, 88, 12, 0.5));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 1px 1px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.15);
+                                                            opacity: 0.8;">
+                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 24px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.5), rgba(234, 88, 12, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                🔴
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Biratnagar</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-orange-500 text-white">High</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">1,680</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">242K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">3.9/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Border Crime, Theft</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">75%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 75%; background-color: rgb(234, 88, 12);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Butwal - High -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 35%; top: 55%;" data-level="High">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(234, 88, 12); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 16px; height: 24px; 
+                                                            background: linear-gradient(45deg, rgb(234, 88, 12), rgba(234, 88, 12, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 18px rgba(234, 88, 12, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -left-2 bottom-0 building-side"
+                                                     style="width: 7px; height: 14px; 
+                                                            background: linear-gradient(45deg, rgba(234, 88, 12, 0.7), rgba(234, 88, 12, 0.5));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 1px 1px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.15);
+                                                            opacity: 0.8;">
+                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 24px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.5), rgba(234, 88, 12, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                🔴
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Butwal</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-orange-500 text-white">High</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">1,240</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">195K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">4.2/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Trafficking, Theft</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">72%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 72%; background-color: rgb(234, 88, 12);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Janakpur - High -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 82%; top: 48%;" data-level="High">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(234, 88, 12); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 16px; height: 24px; 
+                                                            background: linear-gradient(45deg, rgb(234, 88, 12), rgba(234, 88, 12, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 18px rgba(234, 88, 12, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 24px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.5), rgba(234, 88, 12, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                🔴
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Janakpur</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-orange-500 text-white">High</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">1,420</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">173K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">3.6/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Trafficking, Theft</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">78%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 78%; background-color: rgb(234, 88, 12);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Birgunj - Critical -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 75%; top: 52%;" data-level="Critical">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(220, 38, 38); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 20px; height: 32px; 
+                                                            background: linear-gradient(45deg, rgb(220, 38, 38), rgba(220, 38, 38, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 20px rgba(220, 38, 38, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -left-2 bottom-0 building-side"
+                                                     style="width: 8px; height: 16px; 
+                                                            background: linear-gradient(45deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.5));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 1px 1px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.15);
+                                                            opacity: 0.8;">
+                                                    <div class="absolute inset-1 bg-yellow-300 opacity-40 rounded-sm"></div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 28px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(220, 38, 38, 0.25), rgba(220, 38, 38, 0.5), rgba(220, 38, 38, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                ⚠️
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Birgunj</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-red-500 text-white">Critical</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">2,150</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">240K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">2.8/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Border Crime, Smuggling</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">92%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 92%; background-color: rgb(220, 38, 38);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Surkhet - Medium -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 32%; top: 35%;" data-level="Medium">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(217, 119, 6); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 14px; height: 20px; 
+                                                            background: linear-gradient(45deg, rgb(217, 119, 6), rgba(217, 119, 6, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 15px rgba(217, 119, 6, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 20px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(217, 119, 6, 0.25), rgba(217, 119, 6, 0.5), rgba(217, 119, 6, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                🟡
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Surkhet</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-yellow-500 text-white">Medium</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">640</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">128K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">5.4/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Theft, Assault</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">48%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 48%; background-color: rgb(217, 119, 6);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Lahan - Medium -->
+                                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer" 
+                                         style="left: 85%; top: 50%;" data-level="Medium">
+                                        <div class="relative transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1 city-object"
+                                             style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));">
+                                            
+                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-5 h-2 rounded-full animate-ping opacity-40"
+                                                 style="background-color: rgb(217, 119, 6); filter: blur(2px);"></div>
+                                            
+                                            <div class="relative building-main">
+                                                <div class="relative"
+                                                     style="width: 12px; height: 16px; 
+                                                            background: linear-gradient(45deg, rgb(217, 119, 6), rgba(217, 119, 6, 0.8));
+                                                            transform: rotateX(60deg) rotateY(45deg);
+                                                            transform-origin: bottom center;
+                                                            border-radius: 2px 2px 0 0;
+                                                            border: 1px solid rgba(255, 255, 255, 0.2);
+                                                            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                                                                        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                                                                        0 0 12px rgba(217, 119, 6, 0.6);">
+                                                    
+                                                    <div class="window-grid absolute inset-1">
+                                                        <div class="window"></div>
+                                                        <div class="window"></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2"
+                                                     style="width: 16px; height: 3px; 
+                                                            background: linear-gradient(to right, rgba(217, 119, 6, 0.25), rgba(217, 119, 6, 0.5), rgba(217, 119, 6, 0.25));
+                                                            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
+                                            </div>
+                                            
+                                            <div class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-black bg-opacity-80 flex items-center justify-center border border-white border-opacity-30"
+                                                 style="font-size: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                                                🟡
+                                            </div>
+                                        </div>
+
+                                        <div class="tooltip absolute bottom-full left-1/2 mb-4 z-50">
+                                            <div class="bg-card border border-border p-4 rounded-xl shadow-2xl min-w-64 max-w-72 relative"
+                                                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                                                                   0 0 30px rgba(59, 130, 246, 0.3),
+                                                                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                                                        backdrop-filter: blur(16px);">
+                                                
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border"></div>
+                                                    <div class="border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-px"></div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h3 class="font-bold text-foreground text-lg flex items-center gap-2">📍 Lahan</h3>
+                                                    <div class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-yellow-500 text-white">Medium</div>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>📊</span>
+                                                            <span class="font-medium text-muted-foreground">Cases</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">680</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>👥</span>
+                                                            <span class="font-medium text-muted-foreground">Population</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">56K</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🛡️</span>
+                                                            <span class="font-medium text-muted-foreground">Safety Index</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground">5.9/10</p>
+                                                    </div>
+                                                    <div class="bg-secondary/30 p-2 rounded-lg">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span>🚨</span>
+                                                            <span class="font-medium text-muted-foreground">Top Crimes</span>
+                                                        </div>
+                                                        <p class="font-bold text-foreground text-xs">Theft, Fraud</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 p-2 bg-secondary/20 rounded-lg">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-xs font-medium text-muted-foreground">Risk Level</span>
+                                                        <span class="text-xs font-bold text-foreground">42%</span>
+                                                    </div>
+                                                    <div class="w-full bg-secondary rounded-full h-2">
+                                                        <div class="h-2 rounded-full transition-all duration-1000" style="width: 42%; background-color: rgb(217, 119, 6);"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Legend -->
+                                <div class="absolute bottom-4 right-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3" 
+                                     style="box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+                                    <h4 class="text-sm font-semibold text-foreground mb-2 flex items-center gap-1">🎯 Danger Levels</h4>
+                                    <div class="space-y-1 text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(220, 38, 38);"></div>
+                                            <span class="text-muted-foreground">⚠️ Critical</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(234, 88, 12);"></div>
+                                            <span class="text-muted-foreground">🔴 High</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(217, 119, 6);"></div>
+                                            <span class="text-muted-foreground">🟡 Medium</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: rgb(34, 197, 94);"></div>
+                                            <span class="text-muted-foreground">🟢 Low</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Statistics Panel -->
+                            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-secondary/30 p-4 rounded-lg border border-border/50 transition-all duration-300 hover:scale-105 hover:bg-secondary/50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-lg">🚨</span>
+                                            <span class="text-sm font-medium text-muted-foreground">Most Dangerous City</span>
+                                        </div>
+                                        <span class="text-sm font-bold text-red-400">+12%</span>
+                                    </div>
+                                    <p class="text-xl font-bold text-foreground">Kathmandu</p>
+                                    <p class="text-xs text-muted-foreground">4,850 cases reported</p>
+                                </div>
+                                <div class="bg-secondary/30 p-4 rounded-lg border border-border/50 transition-all duration-300 hover:scale-105 hover:bg-secondary/50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-lg">🛡️</span>
+                                            <span class="text-sm font-medium text-muted-foreground">Safest Major City</span>
+                                        </div>
+                                        <span class="text-sm font-bold" style="color: rgb(34, 197, 94);">-3%</span>
+                                    </div>
+                                    <p class="text-xl font-bold text-foreground">Pokhara</p>
+                                    <p class="text-xs text-muted-foreground">890 cases reported</p>
+                                </div>
+                                <div class="bg-secondary/30 p-4 rounded-lg border border-border/50 transition-all duration-300 hover:scale-105 hover:bg-secondary/50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-lg">📍</span>
+                                            <span class="text-sm font-medium text-muted-foreground">Crime Hotspots</span>
+                                        </div>
+                                        <span class="text-sm font-bold" style="color: rgb(234, 179, 8);">+2</span>
+                                    </div>
+                                    <p class="text-xl font-bold text-foreground">8 Active</p>
+                                    <p class="text-xs text-muted-foreground">Require immediate attention</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Crime data
+        const monthlyData = [
+            { month: 'Jan', theft: 934, assault: 450, fraud: 342, homicide: 54, trafficking: 133, cyberCrime: 604 },
+            { month: 'Feb', theft: 887, assault: 423, fraud: 318, homicide: 52, trafficking: 127, cyberCrime: 587 },
+            { month: 'Mar', theft: 945, assault: 467, fraud: 356, homicide: 58, trafficking: 139, cyberCrime: 623 },
+            { month: 'Apr', theft: 912, assault: 441, fraud: 334, homicide: 55, trafficking: 131, cyberCrime: 598 },
+            { month: 'May', theft: 967, assault: 478, fraud: 367, homicide: 61, trafficking: 145, cyberCrime: 641 },
+            { month: 'Jun', theft: 923, assault: 456, fraud: 339, homicide: 56, trafficking: 134, cyberCrime: 612 },
+            { month: 'Jul', theft: 989, assault: 489, fraud: 378, homicide: 63, trafficking: 149, cyberCrime: 658 },
+            { month: 'Aug', theft: 1012, assault: 501, fraud: 389, homicide: 65, trafficking: 153, cyberCrime: 673 },
+            { month: 'Sep', theft: 978, assault: 484, fraud: 372, homicide: 62, trafficking: 147, cyberCrime: 651 },
+            { month: 'Oct', theft: 1034, assault: 512, fraud: 401, homicide: 67, trafficking: 158, cyberCrime: 687 },
+            { month: 'Nov', theft: 998, assault: 494, fraud: 384, homicide: 64, trafficking: 151, cyberCrime: 664 },
+            { month: 'Dec', theft: 1056, assault: 523, fraud: 412, homicide: 69, trafficking: 162, cyberCrime: 701 },
+        ];
+
+        const yearlyData = [
+            { year: 2019, totalCrimes: 23450 },
+            { year: 2020, totalCrimes: 21200 },
+            { year: 2021, totalCrimes: 24800 },
+            { year: 2022, totalCrimes: 26300 },
+            { year: 2023, totalCrimes: 28100 },
+            { year: 2024, totalCrimes: 30200 },
+        ];
+
+        // Initialize charts
+        function initializeCharts() {
+            initBarChart();
+            initLineChart();
+        }
+
+        function initBarChart() {
+            const ctx = document.getElementById('barChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.map(d => d.month),
+                    datasets: [
+                        {
+                            label: 'Theft',
+                            data: monthlyData.map(d => d.theft),
+                            backgroundColor: 'rgb(59, 130, 246)',
+                            stack: 'crimes'
+                        },
+                        {
+                            label: 'Assault',
+                            data: monthlyData.map(d => d.assault),
+                            backgroundColor: 'rgb(239, 68, 68)',
+                            stack: 'crimes'
+                        },
+                        {
+                            label: 'Fraud',
+                            data: monthlyData.map(d => d.fraud),
+                            backgroundColor: 'rgb(245, 158, 11)',
+                            stack: 'crimes'
+                        },
+                        {
+                            label: 'Homicide',
+                            data: monthlyData.map(d => d.homicide),
+                            backgroundColor: 'rgb(220, 38, 38)',
+                            stack: 'crimes'
+                        },
+                        {
+                            label: 'Trafficking',
+                            data: monthlyData.map(d => d.trafficking),
+                            backgroundColor: 'rgb(124, 58, 237)',
+                            stack: 'crimes'
+                        },
+                        {
+                            label: 'Cyber Crime',
+                            data: monthlyData.map(d => d.cyberCrime),
+                            backgroundColor: 'rgb(6, 182, 212)',
+                            stack: 'crimes'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 2000, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'hsl(220, 13%, 8%)',
+                            titleColor: 'hsl(0, 0%, 95%)',
+                            bodyColor: 'hsl(215, 20.2%, 65.1%)',
+                            borderColor: 'hsl(220, 13%, 18%)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'hsl(215, 20.2%, 65.1%)' },
+                            grid: { color: 'hsl(220, 13%, 18%)' }
+                        },
+                        y: {
+                            ticks: { color: 'hsl(215, 20.2%, 65.1%)' },
+                            grid: { color: 'hsl(220, 13%, 18%)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initLineChart() {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: yearlyData.map(d => d.year),
+                    datasets: [{
+                        label: 'Total Crimes',
+                        data: yearlyData.map(d => d.totalCrimes),
+                        borderColor: 'hsl(213, 94%, 50%)',
+                        backgroundColor: 'hsl(213, 94%, 50%, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        pointBackgroundColor: 'hsl(45, 100%, 50%)',
+                        pointBorderColor: 'hsl(213, 94%, 50%)',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 2500, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'hsl(220, 13%, 8%)',
+                            titleColor: 'hsl(0, 0%, 95%)',
+                            bodyColor: 'hsl(215, 20.2%, 65.1%)',
+                            borderColor: 'hsl(220, 13%, 18%)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Total Crimes: ${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'hsl(215, 20.2%, 65.1%)' },
+                            grid: { color: 'hsl(220, 13%, 18%)' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: 'hsl(215, 20.2%, 65.1%)',
+                                callback: function(value) {
+                                    return (value / 1000).toFixed(0) + 'k';
+                                }
+                            },
+                            grid: { color: 'hsl(220, 13%, 18%)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filter functionality
+        document.getElementById('dangerFilter').addEventListener('change', function(e) {
+            const filterValue = e.target.value;
+            const cityMarkers = document.querySelectorAll('[data-level]');
+            
+            cityMarkers.forEach(marker => {
+                const level = marker.getAttribute('data-level');
+                
+                if (filterValue === 'All' || filterValue === level) {
+                    marker.style.display = 'block';
+                } else {
+                    marker.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeCharts();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
