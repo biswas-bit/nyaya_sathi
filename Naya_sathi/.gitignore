@@ -41,4 +41,9 @@ dist/
 *.whl
 
 # SQLite databases or sensitive local DBs
-*.sqlite3
+*.dbsqlite3
+
+# Byte-compiled / optimized / DLL files
+_pycache_/
+*.py[cod]
+*$py.class
